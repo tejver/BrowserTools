@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Simple Paint App</title>
+
+    <link rel="stylesheet" href="../styles.css">
+
+    <style>
+        canvas {
+            width : 45vw;
+            height: 35vh;
+        }
+
+        .tools {
+            display: inline-block;
+        }
+
+        .tool {
+            display: inline-block;
+        }
+
+        .active {
+            font-weight: bold;
+        }
+
+        canvas.eraser-cursor {
+            cursor: none;
+        }
+
+        .cursor-indicator {
+            position: fixed;
+            pointer-events: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid red;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 1000;
+        }
+
+    </style>
+</head>
+<body>
+    <main>
+        <div class="tools">
+            <button id="penBtn" class="tool">Pen</button>
+            <button id="eraserBtn" class="tool">Eraser</button>
+            <button id="clearBtn" class="tool">Clear</button>
+            <a href="../index.html" class="button tool">Exit</a>
+        </div>
+
+        <br>
+
+        <div class="canvas-block">
+            <h2>Original</h2>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="canvas-block">
+            <h2>Mirror X</h2>
+            <canvas id="canvasMirrorX" class="canvas-read"></canvas>
+        </div>
+
+        <div class="canvas-block">
+            <h2>Mirror Y</h2>
+            <canvas id="canvasMirrorY" class="canvas-read"></canvas>
+        </div>
+
+        <div class="canvas-block">
+            <h2>Rotated 180°</h2>
+            <canvas id="canvasRotated180" class="canvas-read"></canvas>
+        </div>
+
+        <script>
+            const CANVAS_WIDTH = window.innerWidth * .45;
+            const CANVAS_HEIGHT = window.innerHeight * .35;
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const canvasMirrorX = document.getElementById('canvasMirrorX');
+            const ctxMirrorX = canvasMirrorX.getContext('2d');
+
+            const canvasMirrorY = document.getElementById('canvasMirrorY');
+            const ctxMirrorY = canvasMirrorY.getContext('2d');
+
+            const canvasRotated180 = document.getElementById('canvasRotated180');
+            const ctxRotated180 = canvasRotated180.getContext('2d');
+
+            const canvases = [canvas, canvasMirrorX, canvasMirrorY, canvasRotated180];
+            canvases.forEach(c => {
+                c.width = CANVAS_WIDTH;
+                c.height = CANVAS_HEIGHT;
+            });
+
+            const clearBtn = document.getElementById('clearBtn');
+            const penBtn = document.getElementById('penBtn');
+            const eraserBtn = document.getElementById('eraserBtn');
+
+            let drawing = false;
+            let tool = 'pen';
+            function getBrushSize() {
+                return tool === 'eraser' ? 20 : 5;
+            }
+
+            function setTool(newTool) {
+                tool = newTool;
+                penBtn.classList.toggle('active', tool === 'pen');
+                eraserBtn.classList.toggle('active', tool === 'eraser');
+
+                document.body.classList.toggle('eraser-active', tool === 'eraser');
+            }
+
+            penBtn.addEventListener('click', () => setTool('pen'));
+            eraserBtn.addEventListener('click', () => setTool('eraser'));
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseleave', stopDrawing);
+
+            function startDrawing(e) {
+                drawing = true;
+                draw(e);
+            }
+
+            function stopDrawing() {
+                drawing = false;
+                [ctx, ctxMirrorX, ctxMirrorY, ctxRotated180].forEach(c => c.beginPath());
+            }
+
+            function applyStyle(context) {
+                context.lineWidth = getBrushSize();
+                context.lineCap = 'round';
+
+                if (tool === 'eraser') {
+                    context.globalCompositeOperation = 'destination-out';
+                } else {
+                    context.globalCompositeOperation = 'source-over';
+                    context.strokeStyle = '#000000';
+                }
+            }
+
+            function draw(e) {
+                if (!drawing) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const points = [
+                    [ctx, x, y],
+                    [ctxMirrorX, CANVAS_WIDTH - x, y],
+                    [ctxMirrorY, x, CANVAS_HEIGHT - y],
+                    [ctxRotated180, CANVAS_WIDTH - x, CANVAS_HEIGHT - y]
+                ];
+
+                points.forEach(([context, px, py]) => {
+                    applyStyle(context);
+                    context.lineTo(px, py);
+                    context.stroke();
+                    context.beginPath();
+                    context.moveTo(px, py);
+                });
+            }
+
+            clearBtn.addEventListener('click', () => {
+                [ctx, ctxMirrorX, ctxMirrorY, ctxRotated180].forEach((c, i) => {
+                    const canvases = [canvas, canvasMirrorX, canvasMirrorY, canvasRotated180];
+                    c.clearRect(0, 0, canvases[i].width, canvases[i].height);
+                });
+            });
+        </script>
+
+        <div id="cursorIndicator" class="cursor-indicator"></div>
+
+        <script>
+            const indicator = document.getElementById('cursorIndicator');
+
+            function updateCursorState() {
+                const canvases = [canvas, canvasMirrorX, canvasMirrorY, canvasRotated180];
+                canvases.forEach(c => {
+                    c.classList.toggle('eraser-cursor', tool === 'eraser');
+                });
+                indicator.style.display = tool === 'eraser' ? 'block' : 'none';
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                if (tool === 'eraser') {
+                    indicator.style.left = e.clientX + 'px';
+                    indicator.style.top = e.clientY + 'px';
+                }
+            });
+
+            // patch setTool to update cursor
+            const originalSetTool = setTool;
+            setTool = function (newTool) {
+                originalSetTool(newTool);
+                updateCursorState();
+            };
+
+            updateCursorState();
+        </script>
+    </main>
+</body>
+</html>
