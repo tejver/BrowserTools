@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Text Diff Checker</title>
+
+    <link rel="stylesheet" href="../styles.css">
+
+    <style>
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            width: 45vw;
+            height: 40vh;
+            display: inline-flex;
+            justify-items: center;
+            flex-direction: column;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        textarea {
+            height: 100%;
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            resize: vertical;
+            margin-top: 10px;
+            resize: none;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #111827;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+            button:hover {
+                opacity: 0.92;
+            }
+
+        .result {
+            width: 90vw;
+            height: 40vh;
+            margin-top: 24px;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 120px;
+        }
+
+        .added {
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        .removed {
+            background: #fee2e2;
+            color: #991b1b;
+            text-decoration: line-through;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        canvas {
+            width: 90%;
+            height: 90%;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="tools">
+            <a href="../index.html" class="button tool">Exit</a>
+        </div>
+
+        <br>
+
+        <div class="panel">
+            <h3>Original Text</h3>
+            <textarea id="text1">The quick brown fox jumps over the lazy dog.</textarea>
+        </div>
+
+        <div class="panel">
+            <h3>Modified Text</h3>
+            <textarea id="text2">The quick red fox jumps over the very lazy dog.</textarea>
+        </div>
+
+        <br>
+
+        <div class="result">
+            <div id="diffCanvas"></div>
+        </div>
+
+        <script>
+            const text1 = document.getElementById("text1");
+            const text2 = document.getElementById("text2");
+
+            const canvas = document.getElementById('diffCanvas');
+
+            function buildText(word, type = 'normal') {
+                const text = document.createElement("span");
+                text.textContent = word;
+
+                if (type === 'added') {
+                    text.style.backgroundColor = '#dcfce7';
+                    text.style.color = '#166534';
+                } else if (type === 'removed') {
+                    text.style.backgroundColor = '#fee2e2';
+                    text.style.color = '#991b1b';
+                    text.style.textDecoration = "line-through";
+                } else {
+                    text.style.color = '#111827';
+                }
+
+                canvas.appendChild(text);
+            }
+
+            function compareTexts() {
+                canvas.innerHTML = '';
+                const original = document
+                    .getElementById('text1')
+                    .value
+                    .trim()
+                    .split(/\r?\n/)
+                    .map(line => line.split(/( )/));
+
+                const modified = document
+                    .getElementById('text2')
+                    .value
+                    .trim()
+                    .split(/\r?\n/)
+                    .map(line => line.split(/( )/));
+
+                const maxLines = Math.max(original.length, modified.length);
+
+                for (let i = 0; i < maxLines; i++) {
+                    if (i + 1 <= original.length && i + 1 <= modified.length) {
+                        const maxLength = Math.max(original[i].length, modified[i].length);
+
+                        for (let j = 0; j < maxLength; j++) {
+                            const word1 = original[i][j];
+                            const word2 = modified[i][j];
+
+                            if (word1 === word2) {
+                                buildText(word1 || '');
+                            } else {
+                                if (word1) {
+                                    buildText(word1, 'removed');
+                                }
+
+                                if (word2) {
+                                    buildText(word2, 'added');
+                                }
+                            }
+                        }
+                    }
+                    else if (i + 1 > original.length && i + 1 <= modified.length) {
+                        const maxLength = Math.max(modified[i].length);
+
+                        for (let j = 0; j < maxLength; j++) {
+                            buildText(modified[i][j], 'added');
+                        }
+                    }
+                    else if (i + 1 > modified.length && i + 1 <= original.length) {
+                        const maxLength = Math.max(original[i].length);
+
+                        for (let j = 0; j < maxLength; j++) {
+                            buildText(original[i][j], 'removed');
+                        }
+                    }
+
+                    if (i < maxLines - 1) {
+                        const text = document.createElement("span");
+                        text.textContent = '\n';
+                        canvas.appendChild(text);
+                    }
+
+                }
+            }
+
+            text1.addEventListener("input", compareTexts);
+            text2.addEventListener("input", compareTexts);
+
+            compareTexts();
+
+        </script>
+    </main>
+</body>
+</html>
