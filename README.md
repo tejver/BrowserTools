@@ -2,7 +2,9 @@
 
 Collection of browser based tools.
 
-[Deployed Pages - Countdown Numbers](https://tejver.github.io/BrowserTools/)
+[Deployed Pages](https://tejver.github.io/BrowserTools/)
+
+Followed - https://learn.microsoft.com/en-us/aspnet/core/blazor/host-and-deploy/webassembly/github-pages?view=aspnetcore-10.0
 
 ## Html tools
 
