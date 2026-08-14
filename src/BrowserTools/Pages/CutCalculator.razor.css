@@ -1,0 +1,13 @@
+input {
+    width: 120px;
+}
+
+.tools {
+    grid-template-columns: repeat(2, minmax(160px, 15%));
+}
+
+.result {
+    width: 80vw;
+    display: inline-flex;
+    justify-items: center;
+}
