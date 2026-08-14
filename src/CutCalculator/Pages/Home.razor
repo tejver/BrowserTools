@@ -43,7 +43,7 @@
                         </tr>
                     </thead>
 
-                    @foreach (var item in Pieces)
+                    @foreach (Piece item in Pieces)
                     {
                         <tr>
                             <td>
@@ -99,7 +99,7 @@
                         <div class="tab-buttons">
                             @for (int i = 0; i < Output.Count; i++)
                             {
-                                var index = i;
+                                int index = i;
 
                                 <button class="@(ActiveTab == index ? "active" : "")" @onclick="() => ActiveTab = index">
                                     Sheet @(index + 1)
@@ -264,16 +264,13 @@
 
             List<Panel> sections = new();
 
-
-            foreach (var item in pieces.OrderByDescending(x => x.Quantity).ThenByDescending(x => x.Height).ThenByDescending(x => x.Width))
+            foreach (Piece item in pieces.OrderByDescending(x => x.Quantity).ThenByDescending(x => x.Height).ThenByDescending(x => x.Width))
             {
                 for (int i = 0; i < item.Quantity; i++)
                 {
                     sections.Add(item);
                 }
             }
-
-            //int minimumSheets = ((sections.Sum(x => x.Height * x.Width) * 21 / 20) / (sheet.Height * sheet.Height)) + 1;
 
             for (int i = 1; i <= 10; i++)
             {
