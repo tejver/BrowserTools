@@ -1,0 +1,415 @@
+﻿@page "/cutCalculator"
+@using System.Text
+
+<PageTitle>Cut Calulator</PageTitle>
+
+<body>
+    <style>
+            input {
+                width: 120px;
+            }
+
+            .tools {
+                grid-template-columns: repeat(2, minmax(160px, 15%));
+            }
+
+            .result {
+                width: 80vw;
+                display: inline-flex;
+                justify-items: center;
+            }
+
+    </style>
+    <header>
+        <h1>Cut Calulator</h1>
+    </header>
+
+    <main>
+        @if (Running)
+        {
+            <div class="loading-overlay">
+                <h2>Running Solver...</h2>
+            </div>
+        }
+        else
+        {
+            <div class="panel">
+                <div class="tools">
+                    <div class="tool">
+                        <h3>Height</h3>
+                        <input id="height" type="number" min="300" @bind="Sheet.Height" />
+                    </div>
+                    <div class="tool">
+                        <h3>Width</h3>
+                        <input id="width" type="number" min="300" @bind="Sheet.Width" />
+                    </div>
+                </div>
+            </div>
+
+            <br />
+
+            <div class="panel">
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Height</td>
+                            <td>Width</td>
+                            <td>Quantity</td>
+                            <td></td>
+                        </tr>
+                    </thead>
+
+                    @foreach (Piece item in Pieces)
+                    {
+                        <tr>
+                            <td>
+                                <input type="number" min="50" @bind="item.Height" />
+                            </td>
+                            <td>
+                                <input type="number" min="50" @bind="item.Width" />
+                            </td>
+                            <td>
+                                <input type="number" min="1" @bind="item.Quantity" />
+                            </td>
+                            <td>
+                                <button @onclick="() => RemoveItem(item)">Remove</button>
+                            </td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <td>
+                            <input type="number" min="50" @bind="AddPiece.Height" />
+                        </td>
+                        <td>
+                            <input type="number" min="50" @bind="AddPiece.Width" />
+                        </td>
+                        <td>
+                            <input type="number" min="1" @bind="AddPiece.Quantity" />
+                        </td>
+                        <td>
+                            <button @onclick="AddItem">Add</button>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+
+            <br />
+
+            <button class="btn btn-primary" @onclick="Solve">Cut</button>
+
+            <br />
+
+            @if (InfoMessage != "")
+            {
+                <h2>@InfoMessage</h2>
+                <br />
+            }
+
+            @if (Solutions.Select(x => x.Value.Count()).Sum() == Pieces.Select(x => x.Quantity).Sum() & Solutions.Any())
+            {
+                <div class="result">
+                    <div class="svg-tabs">
+                        <div class="tab-buttons">
+                            @for (int i = 0; i < Output.Count; i++)
+                            {
+                                int index = i;
+
+                                <button class="@(ActiveTab == index ? "active" : "")" @onclick="() => ActiveTab = index">
+                                    Sheet @(index + 1)
+                                </button>
+                            }
+                        </div>
+
+                        <div class="svg-container">
+                            @(Output[ActiveTab])
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </main>
+</body>
+
+
+@code {
+    private Panel Sheet = new();
+    private List<Piece> Pieces = [];
+
+    private Piece AddPiece = new();
+
+    private bool Running = false;
+
+    private int Kerf = 5;
+    private int Spacer = 100;
+
+    private string InfoMessage = "";
+
+    private Dictionary<int, List<int[]>> Solutions = [];
+
+    private List<MarkupString> Output = new();
+    private int ActiveTab = 0;
+
+    private void RemoveItem(Piece item)
+    {
+        Pieces.Remove(item);
+    }
+
+    private void AddItem()
+    {
+        if (AddPiece.Height > 0 && AddPiece.Width > 0 && AddPiece.Quantity > 0)
+        {
+            Pieces.Add(AddPiece);
+
+            AddPiece = new();
+            InfoMessage = "";
+        }
+        else
+        {
+            InfoMessage = "Invalid value, must be greater than 0";
+        }
+    }
+
+    private async Task Solve()
+    {
+        Running = true;
+        InfoMessage = "";
+        Solutions.Clear();
+
+        if (Sheet.Height < 300)
+        {
+            InfoMessage = "Invalid height, height needs to be at least 300";
+            Running = false;
+            return;
+        }
+
+        if (Sheet.Width < 300)
+        {
+            InfoMessage = "Invalid width, height needs to be at least 300";
+            Running = false;
+            return;
+        }
+
+        if (Pieces.Select(x => x.Height * x.Width).Where(x => x > Sheet.Height * Sheet.Width).Any())
+        {
+            InfoMessage = "Invalid section, section has to be smaller than sheet";
+            Running = false;
+            return;
+        }
+
+        if (Pieces.Select(x => x.Height).Where(x => x + 20 > Sheet.Height).Any())
+        {
+            InfoMessage = "Invalid section, value has at least 20 less than height";
+            Running = false;
+            return;
+        }
+
+        if (Pieces.Select(x => x.Width).Where(x => x + 20 > Sheet.Width).Any())
+        {
+            InfoMessage = "Invalid section, value has at least 20 less  than width";
+            Running = false;
+            return;
+        }
+
+        if (Pieces.Select(x => x.Height).Where(x => x < 50).Any())
+        {
+            InfoMessage = "Invalid section, value has be at least 50";
+            Running = false;
+            return;
+        }
+
+        if (Pieces.Select(x => x.Width).Where(x => x < 50).Any())
+        {
+            InfoMessage = "Invalid section, value has at least 50";
+            Running = false;
+            return;
+        }
+        if (Pieces.Select(x => x.Quantity).Where(x => x <= 0).Any())
+        {
+            InfoMessage = "Invalid quantity, expected at least 1";
+            Running = false;
+            return;
+        }
+
+        await Task.Yield();
+
+        long TickStart = DateTime.UtcNow.Ticks;
+
+        CancellationTokenSource tokenTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        CancellationToken token = tokenTimeout.Token;
+
+        Solutions = await GetCutList(Sheet, Pieces, token);
+
+        if (Solutions.Select(x => x.Value.Count()).Sum() == Pieces.Select(x => x.Quantity).Sum())
+        {
+            Output.Clear();
+
+            foreach (KeyValuePair<int, List<int[]>> item in Solutions)
+            {
+                if (item.Value.Any())
+                {
+                    StringBuilder result = new StringBuilder();
+
+                    result.AppendLine($"<svg viewbox=\"0 0 {Sheet.Width} {Sheet.Height}\" height=\"{Sheet.Height}\" width=\"{Sheet.Width}\" preserveAspectRatio=\"xMidYMid meet\">");
+
+                    result.AppendLine($"<rect x=\"0\" y=\"0\" height=\"{Sheet.Height}\" width=\"{Sheet.Width}\" fill=\"#f5f5f5\" stroke=\"red\"/>");
+
+                    foreach (int[] subItem in item.Value)
+                    {
+                        result.AppendLine($"<rect x=\"{subItem[0]}\" y=\"{subItem[1]}\" height=\"{subItem[2]}\" width=\"{subItem[3]}\" fill=\"white\" stroke=\"black\"/>");
+                        result.AppendLine($"<text x=\"{subItem[0] + 10}\" y=\"{(subItem[2] / 2) + subItem[1]}\" fill=\"black\">{subItem[2]}</text>");
+                        result.AppendLine($"<text x=\"{(subItem[3] / 2) + subItem[0]}\" y=\"{subItem[1] + 20}\" fill=\"black\">{subItem[3]}</text>");
+                    }
+
+                    result.AppendLine("</svg>");
+                    result.AppendLine("<br />");
+
+                    Output.Add(new MarkupString(result.ToString()));
+                }
+            }
+        }
+
+        long TickEnd = DateTime.UtcNow.Ticks;
+
+        Running = false;
+    }
+
+    async Task<Dictionary<int, List<int[]>>> GetCutList(Panel sheet, List<Piece> pieces, CancellationToken token)
+    {
+        try
+        {
+            Dictionary<int, List<int[]>> result = new();
+
+            token.ThrowIfCancellationRequested();
+
+            List<Panel> sections = new();
+
+            foreach (Piece item in pieces.OrderByDescending(x => x.Quantity).ThenByDescending(x => x.Height).ThenByDescending(x => x.Width))
+            {
+                for (int i = 0; i < item.Quantity; i++)
+                {
+                    sections.Add(item);
+                }
+            }
+
+            for (int i = 1; i <= 10; i++)
+            {
+                result.Add(i, new List<int[]>());
+            }
+
+            int cutSheet = 1;
+            int x = Kerf;
+            int y = Kerf;
+
+            int xCoord = Kerf;
+            int yCoord = Kerf;
+
+            int xSpace = 0;
+            int ySpace = 0;
+
+            int xKerf = 0;
+            int yKerf = 0;
+
+            while (true)
+            {
+                await Task.Yield();
+
+                List<Panel> remove = new();
+
+                foreach (Panel item in sections)
+                {
+                    if ((item.Height + yKerf) <= ySpace && item.Width <= xSpace)
+                    {
+                        remove.Add(item);
+                        result[cutSheet].Add([xCoord, yCoord, item.Height, item.Width]);
+
+                        if (item.Height + Spacer < ySpace)
+                        {
+                            yCoord += item.Height;
+
+                            xSpace = item.Width;
+                            ySpace -= (item.Height + Kerf);
+
+                            yKerf += Kerf;
+                        }
+                        else
+                        {
+                            xCoord = Kerf;
+                            yCoord = Kerf;
+
+                            xSpace = 0;
+                            ySpace = 0;
+
+                            yKerf = 0;
+                        }
+                    }
+                    else if ((x + (item.Width + xKerf)) < sheet.Width)
+                    {
+                        remove.Add(item);
+
+                        result[cutSheet].Add([x, y, item.Height, item.Width]);
+
+                        if (item.Height + Spacer < sheet.Height)
+                        {
+                            xCoord = x;
+                            yCoord = item.Height + Kerf;
+
+                            xSpace = item.Width;
+                            ySpace = sheet.Height - Kerf - item.Height;
+
+                            yKerf = 0;
+                        }
+
+                        x += item.Width;
+                        xKerf += Kerf;
+                    }
+                }
+
+                x = Kerf;
+                y = Kerf;
+
+                xCoord = 0;
+                yCoord = 0;
+
+                xSpace = 0;
+                ySpace = 0;
+
+                xKerf = 0;
+                yKerf = 0;
+
+                cutSheet++;
+
+                foreach (Panel item in remove)
+                {
+                    sections.Remove(item);
+                }
+
+                if (!sections.Any())
+                {
+                    break;
+                }
+
+            }
+
+            return result;
+        }
+        catch
+        {
+            InfoMessage = "Operation timed out";
+            return [];
+        }
+    }
+
+    class Panel
+    {
+        public int Height { get; set; }
+        public int Width { get; set; }
+    }
+
+    class Piece : Panel
+    {
+        public int Quantity { get; set; }
+    }
+}

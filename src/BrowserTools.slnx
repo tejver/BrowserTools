@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="CountdownNumbers/CountdownNumbers.csproj" />
-  <Project Path="CutCalculator/CutCalculator.csproj" />
+  <Project Path="BrowserTools/BrowserTools.csproj" />
 </Solution>
