@@ -6,3 +6,13 @@
     height: 70vh;
     overflow-y: scroll;
 }
+
+.btn-check + .btn {
+    text-decoration: line-through;
+}
+
+.btn-check:checked + .btn {
+    background-color: #198754;
+    border-color: #198754;
+    text-decoration: none;
+}

@@ -3,7 +3,7 @@
 <PageTitle>Countdown Numbers</PageTitle>
 
 <body>
-    
+
     <header>
         <h1>Countdown Numbers</h1>
     </header>
@@ -27,29 +27,58 @@
             <div class="panel">
                 <div class="tools">
 
-                    <div class="tool">
-                        <select id="number1" @bind="Numbers[0]"><option value="0" disabled>0</option>@Options</select>
-                    </div>
+                    @if (IsScary)
+                    {
+                        <div class="tool">
+                            <select id="number1" @bind="Numbers[0]"><option value="0" disabled>0</option>@OptionsScary</select>
+                        </div>
 
-                    <div class="tool">
-                        <select id="number2" @bind="Numbers[1]"><option value="0" disabled>0</option>@Options</select>
-                    </div>
+                        <div class="tool">
+                            <select id="number2" @bind="Numbers[1]"><option value="0" disabled>0</option>@OptionsScary</select>
+                        </div>
 
-                    <div class="tool">
-                        <select id="number2" @bind="Numbers[2]"><option value="0" disabled>0</option>@Options</select>
-                    </div>
+                        <div class="tool">
+                            <select id="number2" @bind="Numbers[2]"><option value="0" disabled>0</option>@OptionsScary</select>
+                        </div>
 
-                    <div class="tool">
-                        <select id="number4" @bind="Numbers[3]"><option value="0" disabled>0</option>@Options</select>
-                    </div>
+                        <div class="tool">
+                            <select id="number4" @bind="Numbers[3]"><option value="0" disabled>0</option>@OptionsScary</select>
+                        </div>
 
-                    <div class="tool">
-                        <select id="number5" @bind="Numbers[4]"><option value="0" disabled>0</option>@Options</select>
-                    </div>
+                        <div class="tool">
+                            <select id="number5" @bind="Numbers[4]"><option value="0" disabled>0</option>@OptionsScary</select>
+                        </div>
 
-                    <div class="tool">
-                        <select id="number6" @bind="Numbers[5]"><option value="0" disabled>0</option>@Options</select>
-                    </div>
+                        <div class="tool">
+                            <select id="number6" @bind="Numbers[5]"><option value="0" disabled>0</option>@OptionsScary</select>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="tool">
+                            <select id="number1" @bind="Numbers[0]"><option value="0" disabled>0</option>@Options</select>
+                        </div>
+
+                        <div class="tool">
+                            <select id="number2" @bind="Numbers[1]"><option value="0" disabled>0</option>@Options</select>
+                        </div>
+
+                        <div class="tool">
+                            <select id="number2" @bind="Numbers[2]"><option value="0" disabled>0</option>@Options</select>
+                        </div>
+
+                        <div class="tool">
+                            <select id="number4" @bind="Numbers[3]"><option value="0" disabled>0</option>@Options</select>
+                        </div>
+
+                        <div class="tool">
+                            <select id="number5" @bind="Numbers[4]"><option value="0" disabled>0</option>@Options</select>
+                        </div>
+
+                        <div class="tool">
+                            <select id="number6" @bind="Numbers[5]"><option value="0" disabled>0</option>@Options</select>
+                        </div>
+                    }
 
                 </div>
             </div>
@@ -62,6 +91,12 @@
             <button class="btn btn-secondary" @onclick="Random42">4 Small, 2 Big</button>
             <button class="btn btn-secondary" @onclick="Random33">3 Small, 3 Big</button>
             <button class="btn btn-secondary" @onclick="Random24">2 Small, 4 Big</button>
+
+            <input type="checkbox" class="btn-check" id="option1" autocomplete="off" @bind="IsScary" @onclick="Reset">
+            <label class="btn btn-danger" for="option1">Scary Numbers</label>
+
+            <button class="btn btn-info" @onclick="Reset">Reset</button>
+
 
             <br />
 

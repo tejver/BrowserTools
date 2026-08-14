@@ -7,10 +7,14 @@ namespace BrowserTools.Pages
     public partial class CountdownNumbers
     {
         private int[] ValidNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 75, 100];
+        private int[] ValidScaryNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 37, 62, 87];
         private int[] SmallNumbers = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10];
         private int[] BigNumbers = [25, 50, 75, 100];
+        private int[] BigScaryNumbers = [12, 37, 62, 87];
         private int Total = 0;
         private int[] Numbers = [0, 0, 0, 0, 0, 0];
+
+        private bool IsScary = false;
 
         private bool Running = false;
 
@@ -21,13 +25,19 @@ namespace BrowserTools.Pages
         private MarkupString Output = new MarkupString();
 
         private MarkupString Options = new MarkupString("<option value=1>1</option><option value=2>2</option><option value=3>3</option><option value=4>4</option><option value=5>5</option><option value=6>6</option><option value=7>7</option><option value=8>8</option><option value=9>9</option><option value=10>10</option><option value=25>25</option><option value=50>50</option><option value=75>75</option><option value=100>100</option>");
+        
+        private MarkupString OptionsScary = new MarkupString("<option value=1>1</option><option value=2>2</option><option value=3>3</option><option value=4>4</option><option value=5>5</option><option value=6>6</option><option value=7>7</option><option value=8>8</option><option value=9>9</option><option value=10>10</option><option value=12>12</option><option value=37>37</option><option value=62>62</option><option value=87>87</option>");
 
+        private void Reset()
+        {
+            Numbers = [0, 0, 0, 0, 0, 0];
+        }
 
         private void Random()
         {
             Random random = new();
 
-            Numbers = SmallNumbers.Concat(BigNumbers).OrderBy(_ => random.Next()).Take(6).ToArray();
+            Numbers = SmallNumbers.Concat(IsScary ? BigScaryNumbers : BigNumbers).OrderBy(_ => random.Next()).Take(6).ToArray();
             Total = random.Next(100, 999);
         }
 
@@ -43,7 +53,7 @@ namespace BrowserTools.Pages
         {
             Random random = new();
 
-            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(5).Concat(BigNumbers.OrderBy(_ => random.Next()).Take(1)).ToArray();
+            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(5).Concat((IsScary ? BigScaryNumbers : BigNumbers).OrderBy(_ => random.Next()).Take(1)).ToArray();
             Total = random.Next(100, 999);
         }
 
@@ -51,7 +61,7 @@ namespace BrowserTools.Pages
         {
             Random random = new();
 
-            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(4).Concat(BigNumbers.OrderBy(_ => random.Next()).Take(2)).ToArray();
+            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(4).Concat((IsScary ? BigScaryNumbers : BigNumbers).OrderBy(_ => random.Next()).Take(2)).ToArray();
             Total = random.Next(100, 999);
         }
 
@@ -59,7 +69,7 @@ namespace BrowserTools.Pages
         {
             Random random = new();
 
-            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(3).Concat(BigNumbers.OrderBy(_ => random.Next()).Take(3)).ToArray();
+            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(3).Concat((IsScary ? BigScaryNumbers : BigNumbers).OrderBy(_ => random.Next()).Take(3)).ToArray();
             Total = random.Next(100, 999);
         }
 
@@ -67,7 +77,7 @@ namespace BrowserTools.Pages
         {
             Random random = new();
 
-            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(2).Concat(BigNumbers.OrderBy(_ => random.Next()).Take(4)).ToArray();
+            Numbers = SmallNumbers.OrderBy(_ => random.Next()).Take(2).Concat((IsScary ? BigScaryNumbers : BigNumbers).OrderBy(_ => random.Next()).Take(4)).ToArray();
             Total = random.Next(100, 999);
         }
 
@@ -84,23 +94,23 @@ namespace BrowserTools.Pages
                 return;
             }
 
-            if (Numbers.Except(ValidNumbers).Any())
+            if (Numbers.Except(IsScary ? ValidScaryNumbers : ValidNumbers).Any())
             {
-                InfoMessage = "Invalid number, expecting only 1-10, 25, 50, 75 and 100";
+                InfoMessage = "Invalid number found";
                 Running = false;
                 return;
             }
 
             if (Numbers.Where(x => x <= 10).GroupBy(x => x).Where(x => x.Count() > 2).Any())
             {
-                InfoMessage = "Invalid numbers, expecting a maximum of 2 numbers between 1 and 10";
+                InfoMessage = "Invalid numbers, expecting a maximum of 2 small numbers";
                 Running = false;
                 return;
             }
 
             if (Numbers.Where(x => x > 10).GroupBy(x => x).Where(x => x.Count() > 1).Any())
             {
-                InfoMessage = "Invalid numbers, expecting a maximum of 1 number out of 25, 50, 75 and 100";
+                InfoMessage = "Invalid numbers, expecting a maximum of 1 big number";
                 Running = false;
                 return;
             }
