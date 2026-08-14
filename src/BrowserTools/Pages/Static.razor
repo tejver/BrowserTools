@@ -1,8 +1,8 @@
 ﻿@page "/static/{folder}"
 
-<iframe src="@($"/{Folder}/index.html")"
-        class="static-page">
-</iframe>
+@inject NavigationManager Navigation
+
+<iframe src="@($"{Navigation.BaseUri}{Folder}/index.html")" class="static-page"></iframe>
 
 @code {
     [Parameter]
