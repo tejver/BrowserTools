@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <title>Simple Paint App</title>
 
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../static.css">
 
     <style>
         canvas {
-            width : 45vw;
+            width : 40vw;
             height: 35vh;
         }
 
@@ -39,7 +39,6 @@
             display: none;
             z-index: 1000;
         }
-
     </style>
 </head>
 <body>
@@ -48,7 +47,6 @@
             <button id="penBtn" class="tool">Pen</button>
             <button id="eraserBtn" class="tool">Eraser</button>
             <button id="clearBtn" class="tool">Clear</button>
-            <a href="../index.html" class="button tool">Exit</a>
         </div>
 
         <br>
@@ -74,7 +72,7 @@
         </div>
 
         <script>
-            const CANVAS_WIDTH = window.innerWidth * .45;
+            const CANVAS_WIDTH = window.innerWidth * .40;
             const CANVAS_HEIGHT = window.innerHeight * .35;
 
             const canvas = document.getElementById('canvas');

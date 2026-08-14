@@ -1,0 +1,10 @@
+﻿@page "/static/{folder}"
+
+<iframe src="@($"/{Folder}/index.html")"
+        class="static-page">
+</iframe>
+
+@code {
+    [Parameter]
+    public string Folder { get; set; } = "";
+}
