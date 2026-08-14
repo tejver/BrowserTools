@@ -23,4 +23,4 @@ Collection of browser based tools.
 
 ## Cut Calculator
 - Based off CellBlocks solver, a cut caculator which can split a defined area into the requried sections.
-    - Has a kerf margin built in, to all it to be used for planning sheet material cuts.
+    - Has a kerf margin built in, to allow it to be used for planning sheet material cuts.
