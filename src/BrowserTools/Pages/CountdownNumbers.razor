@@ -9,113 +9,139 @@
     </header>
 
     <main>
-        @if (Running)
-        {
-            <div class="loading-overlay">
-                <h2>Running Solver...</h2>
+
+        <div class="panel">
+            <h3>Total</h3>
+            <input id="total" type="number" min="1" max="999" @bind="Total" disabled="@Running" />
+        </div>
+
+        <br />
+
+        <div class="panel">
+            <div class="tools">
+
+                @if (IsScary)
+                {
+                    <div class="tool">
+                        <select id="number1" @bind="Numbers[0]" disabled="@Running"><option value="0" disabled>0</option>@OptionsScary</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number2" @bind="Numbers[1]" disabled="@Running"><option value="0" disabled>0</option>@OptionsScary</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number2" @bind="Numbers[2]" disabled="@Running"><option value="0" disabled>0</option>@OptionsScary</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number4" @bind="Numbers[3]" disabled="@Running"><option value="0" disabled>0</option>@OptionsScary</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number5" @bind="Numbers[4]" disabled="@Running"><option value="0" disabled>0</option>@OptionsScary</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number6" @bind="Numbers[5]" disabled="@Running"><option value="0" disabled>0</option>@OptionsScary</select>
+                    </div>
+                }
+                else
+                {
+                    <div class="tool">
+                        <select id="number1" @bind="Numbers[0]" disabled="@Running"><option value="0" disabled>0</option>@Options</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number2" @bind="Numbers[1]" disabled="@Running"><option value="0" disabled>0</option>@Options</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number2" @bind="Numbers[2]" disabled="@Running"><option value="0" disabled>0</option>@Options</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number4" @bind="Numbers[3]" disabled="@Running"><option value="0" disabled>0</option>@Options</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number5" @bind="Numbers[4]" disabled="@Running"><option value="0" disabled>0</option>@Options</select>
+                    </div>
+
+                    <div class="tool">
+                        <select id="number6" @bind="Numbers[5]" disabled="@Running"><option value="0" disabled>0</option>@Options</select>
+                    </div>
+                }
             </div>
+
+            <div class="tools">
+                <div class="btnTool">
+                    <button class="btn btn-secondary" @onclick="Random" disabled="@Running">Random</button>
+                </div>
+                <div class="btnTool">
+                    <button class="btn btn-secondary" @onclick="Random6" disabled="@Running">6 Small</button>
+                </div>
+                <div class="btnTool">
+                    <button class="btn btn-secondary" @onclick="Random51" disabled="@Running">5 Small, 1 Big</button>
+                </div>
+                <div class="btnTool">
+                    <button class="btn btn-secondary" @onclick="Random42" disabled="@Running">4 Small, 2 Big</button>
+                </div>
+                <div class="btnTool">
+                    <button class="btn btn-secondary" @onclick="Random33" disabled="@Running">3 Small, 3 Big</button>
+                </div>
+                <div class="btnTool">
+                    <button class="btn btn-secondary" @onclick="Random24" disabled="@Running">2 Small, 4 Big</button>
+                </div>
+                <div class="btnTool">
+                    <input type="checkbox" class="btn btn-check" id="option1" autocomplete="off" @bind="IsScary" @onclick="Reset" disabled="@Running">
+                    <label class="btn btn-danger" for="option1">Scary Numbers</label>
+                </div>
+                <div class="btnTool">
+                    <button class="btn btn-info" @onclick="Reset" disabled="@Running">Reset</button>
+                </div>
+                <div class="btnTool">
+                    <button class="btn btn-primary" @onclick="Solve" disabled="@Running">Solve</button>
+                </div>
+            </div>
+        </div>
+
+        <br />
+
+        @if (InfoMessage != "")
+        {
+            <h2>@InfoMessage</h2>
+            <br />
         }
-        else
+
+        @if (Solutions.Any())
         {
             <div class="panel">
-                <h3>Total</h3>
-                <input id="total" type="number" min="1" max="999" @bind="Total" />
-            </div>
-
-            <br />
-
-            <div class="panel">
-                <div class="tools">
-
-                    @if (IsScary)
+                <div class="nav nav-tabs">
+                    @foreach (var solution in Solutions)
                     {
-                        <div class="tool">
-                            <select id="number1" @bind="Numbers[0]"><option value="0" disabled>0</option>@OptionsScary</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number2" @bind="Numbers[1]"><option value="0" disabled>0</option>@OptionsScary</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number2" @bind="Numbers[2]"><option value="0" disabled>0</option>@OptionsScary</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number4" @bind="Numbers[3]"><option value="0" disabled>0</option>@OptionsScary</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number5" @bind="Numbers[4]"><option value="0" disabled>0</option>@OptionsScary</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number6" @bind="Numbers[5]"><option value="0" disabled>0</option>@OptionsScary</select>
-                        </div>
+                        <button class="nav-link @(ActiveTab == solution.Key ? "active" : "")"
+                                @onclick="() => ActiveTab = solution.Key">
+                            @solution.Key
+                        </button>
                     }
-                    else
+                </div>
+
+                <div class="tab-content mt-3">
+                    @foreach (var solution in Solutions)
                     {
-                        <div class="tool">
-                            <select id="number1" @bind="Numbers[0]"><option value="0" disabled>0</option>@Options</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number2" @bind="Numbers[1]"><option value="0" disabled>0</option>@Options</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number2" @bind="Numbers[2]"><option value="0" disabled>0</option>@Options</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number4" @bind="Numbers[3]"><option value="0" disabled>0</option>@Options</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number5" @bind="Numbers[4]"><option value="0" disabled>0</option>@Options</select>
-                        </div>
-
-                        <div class="tool">
-                            <select id="number6" @bind="Numbers[5]"><option value="0" disabled>0</option>@Options</select>
-                        </div>
+                        @if (ActiveTab == solution.Key)
+                        {
+                            <div class="tab-pane active">
+                                @foreach (var item in solution.Value)
+                                {
+                                    <div>@item</div>
+                                }
+                            </div>
+                        }
                     }
-
                 </div>
             </div>
-
-            <br />
-
-            <button class="btn btn-secondary" @onclick="Random">Random</button>
-            <button class="btn btn-secondary" @onclick="Random6">6 Small</button>
-            <button class="btn btn-secondary" @onclick="Random51">5 Small, 1 Big</button>
-            <button class="btn btn-secondary" @onclick="Random42">4 Small, 2 Big</button>
-            <button class="btn btn-secondary" @onclick="Random33">3 Small, 3 Big</button>
-            <button class="btn btn-secondary" @onclick="Random24">2 Small, 4 Big</button>
-
-            <input type="checkbox" class="btn-check" id="option1" autocomplete="off" @bind="IsScary" @onclick="Reset">
-            <label class="btn btn-danger" for="option1">Scary Numbers</label>
-
-            <button class="btn btn-info" @onclick="Reset">Reset</button>
-
-
-            <br />
-
-            <button class="btn btn-primary" @onclick="Solve">Solve</button>
-
-            <br />
-
-            @if (InfoMessage != "")
-            {
-                <h2>@InfoMessage</h2>
-                <br />
-            }
-
-            @if (Solutions.Any())
-            {
-                <div class="result">
-                    @Output
-                </div>
-            }
         }
     </main>
 </body>

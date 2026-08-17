@@ -2,6 +2,14 @@
     grid-template-columns: repeat(auto-fill, minmax(140px, 15%));
 }
 
+.btnTool{
+
+}
+
+.btn {
+    width: max(140px, 15%);
+}
+
 .result {
     height: 70vh;
     overflow-y: scroll;
@@ -15,4 +23,8 @@
     background-color: #198754;
     border-color: #198754;
     text-decoration: none;
+}
+
+.nav-tabs {
+    justify-content: center;
 }

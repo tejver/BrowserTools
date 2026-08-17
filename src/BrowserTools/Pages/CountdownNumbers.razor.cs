@@ -20,17 +20,26 @@ namespace BrowserTools.Pages
 
         private string InfoMessage = "";
 
-        private Dictionary<int, List<string>> Solutions = [];
+        private Dictionary<int, List<MarkupString>> Solutions = [];
+
+        private int ActiveTab;
+
+        protected override void OnInitialized()
+        {
+            ActiveTab = Solutions.Keys.FirstOrDefault();
+        }
 
         private MarkupString Output = new MarkupString();
 
         private MarkupString Options = new MarkupString("<option value=1>1</option><option value=2>2</option><option value=3>3</option><option value=4>4</option><option value=5>5</option><option value=6>6</option><option value=7>7</option><option value=8>8</option><option value=9>9</option><option value=10>10</option><option value=25>25</option><option value=50>50</option><option value=75>75</option><option value=100>100</option>");
-        
+
         private MarkupString OptionsScary = new MarkupString("<option value=1>1</option><option value=2>2</option><option value=3>3</option><option value=4>4</option><option value=5>5</option><option value=6>6</option><option value=7>7</option><option value=8>8</option><option value=9>9</option><option value=10>10</option><option value=12>12</option><option value=37>37</option><option value=62>62</option><option value=87>87</option>");
 
         private void Reset()
         {
             Numbers = [0, 0, 0, 0, 0, 0];
+            InfoMessage = "";
+            Solutions.Clear();
         }
 
         private void Random()
@@ -83,110 +92,67 @@ namespace BrowserTools.Pages
 
         private async Task Solve()
         {
-            Running = true;
             InfoMessage = "";
             Solutions.Clear();
+            Running = true;
+            ActiveTab = Total;
+
+            StateHasChanged();
+
+            await Task.Yield();
 
             if (Total < 100 || Total > 999)
             {
-                InfoMessage = "Invalid total, expecting between 100 and 999";
                 Running = false;
+                InfoMessage = "Invalid total, expecting between 100 and 999";
                 return;
             }
 
             if (Numbers.Except(IsScary ? ValidScaryNumbers : ValidNumbers).Any())
             {
-                InfoMessage = "Invalid number found";
                 Running = false;
+                InfoMessage = "Invalid number found";
                 return;
             }
 
             if (Numbers.Where(x => x <= 10).GroupBy(x => x).Where(x => x.Count() > 2).Any())
             {
-                InfoMessage = "Invalid numbers, expecting a maximum of 2 small numbers";
                 Running = false;
+                InfoMessage = "Invalid numbers, expecting a maximum of 2 small numbers";
                 return;
             }
 
             if (Numbers.Where(x => x > 10).GroupBy(x => x).Where(x => x.Count() > 1).Any())
             {
-                InfoMessage = "Invalid numbers, expecting a maximum of 1 big number";
                 Running = false;
+                InfoMessage = "Invalid numbers, expecting a maximum of 1 big number";
                 return;
             }
 
             if (Numbers.Aggregate(1, (total, x) => total * x) < Total)
             {
-                InfoMessage = "No solution possible, product of numbers is less than total";
                 Running = false;
+                InfoMessage = "No solution possible, product of numbers is less than total";
                 return;
             }
-
-            await Task.Yield();
 
             long TickStart = DateTime.UtcNow.Ticks;
 
             CancellationTokenSource tokenTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             CancellationToken token = tokenTimeout.Token;
 
-            Solutions = await GetEquation(Total, Numbers, token);
+            IEnumerable<int[]> numberCombinations = GetUniqueCombinations(Numbers, 6);
+            IEnumerable<string> operationCombinations = GetOperations();
 
-            long TickEnd = DateTime.UtcNow.Ticks;
-
-            if (Solutions.ContainsKey(Total))
+            for (int i = -10; i < 11; i++)
             {
-                Output = new MarkupString(string.Join("", Solutions[Total]));
-                InfoMessage = $"Solved in {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, found {Solutions[Total].Count()} solution{(Solutions[Total].Count() == 1 ? "" : "s")}.";
-            }
-            else if (Solutions.Where(x => x.Key != Total).Any())
-            {
-                int i = 1;
-
-                while (i <= 11)
-                {
-                    if (Solutions.ContainsKey(Total + i))
-                    {
-                        Output = new MarkupString(string.Join("", Solutions[Total + i]));
-                        InfoMessage = $"Closest solution is {Total + i}, took {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, found {Solutions[Total + i].Count()} solution{(Solutions[Total + i].Count() == 1 ? "" : "s")}.";
-                        break;
-                    }
-                    else if (Solutions.ContainsKey(Total - i))
-                    {
-                        Output = new MarkupString(string.Join("", Solutions[Total - i]));
-                        InfoMessage = $"Closest solution is {Total - i}, took  {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, found {Solutions[Total - i].Count()} solution{(Solutions[Total - i].Count() == 1 ? "" : "s")}.";
-                        break;
-                    }
-                    i++;
-                }
-
-                if (i == 11)
-                {
-                    if (string.IsNullOrWhiteSpace(InfoMessage))
-                    {
-                        InfoMessage = $"No solution found, tool {new TimeSpan(TickEnd - TickStart).TotalSeconds}s";
-                    }
-                }
-            }
-            else
-            {
-                if (string.IsNullOrWhiteSpace(InfoMessage))
-                {
-                    InfoMessage = $"No solution found, tool {new TimeSpan(TickEnd - TickStart).TotalSeconds}s";
-                }
+                Solutions.Add(Total + i, new List<MarkupString>());
             }
 
-            Running = false;
-        }
+            StateHasChanged();
 
-        async Task<Dictionary<int, List<string>>> GetEquation(int target, int[] numbers, CancellationToken token)
-        {
             try
             {
-                Dictionary<int, List<string>> ret = [];
-
-                IEnumerable<int[]> numberCombinations = GetUniqueCombinations(numbers, 6);
-                IEnumerable<string> operationCombinations = GetOperations();
-
                 foreach (int[] numberItem in numberCombinations)
                 {
                     token.ThrowIfCancellationRequested();
@@ -200,7 +166,7 @@ namespace BrowserTools.Pages
                             bool skip = false;
                             int res = numberItem[0];
 
-                            if (res == 1 && (operationsItem[0] == '*' || operationsItem[0] == '/'))
+                            if (res == 1 && (operationsItem[0] == '×' || operationsItem[0] == '/'))
                                 skip = true;
 
                             for (int j = 0; j < operationsItem.Count(); j++)
@@ -208,7 +174,7 @@ namespace BrowserTools.Pages
                                 if (res <= 0)
                                     skip = true;
 
-                                if (j > 0 && res == 1 && (operationsItem[0] == '*' || operationsItem[0] == '/'))
+                                if (j > 0 && res == 1 && (operationsItem[0] == '×' || operationsItem[0] == '/'))
                                     skip = true;
 
                                 if (operationsItem[j] == '+')
@@ -219,7 +185,7 @@ namespace BrowserTools.Pages
                                 {
                                     res -= numberItem[j + 1];
                                 }
-                                else if (operationsItem[j] == '*')
+                                else if (operationsItem[j] == '×')
                                 {
                                     if (numberItem[j + 1] == 1)
                                         skip = true;
@@ -238,16 +204,9 @@ namespace BrowserTools.Pages
                                 }
                             }
 
-                            if (!skip && (res == target || (res + 10 >= target && res - 10 <= target)))
+                            if (!skip && (res == Total || (res + 10 >= Total && res - 10 <= Total)))
                             {
                                 StringBuilder result = new StringBuilder();
-
-                                result.Append("<span>");
-
-                                if (res != target)
-                                {
-                                    result.Append($"{res} = ");
-                                }
 
                                 for (int j = 0; j < numberItem.Count() - 1; j++)
                                 {
@@ -261,26 +220,85 @@ namespace BrowserTools.Pages
                                     result.Append($"{operationsItem[j - 1]} {numberItem.Skip(j).First()}) ");
                                 }
 
-                                result.Append("</span> <br />");
+                                Solutions[res].Add(BuildSVG(res, result.ToString().Trim()));
 
-                                if (!ret.ContainsKey(res))
-                                    ret.Add(res, new List<string>());
-
-                                ret[res].Add(result.ToString());
+                                StateHasChanged();
                             }
                         }
-
                         await Task.Yield();
                     }
-                }
 
-                return ret;
+                    await Task.Yield();
+                }
             }
             catch
             {
-                InfoMessage = "Operation timed out";
-                return [];
+                if (Solutions.All(x => x.Value.Count == 0))
+                {
+                    InfoMessage = $"Operation timed out. No solutions found.";
+                    Running = false;
+                    return;
+                }
             }
+            
+            long TickEnd = DateTime.UtcNow.Ticks;
+
+            ActiveTab = Total;
+
+            foreach (int key in Solutions.Where(x => x.Value.Count == 0).Select(x => x.Key).ToList())
+            {
+                Solutions.Remove(key);
+            }
+
+            if (Solutions.ContainsKey(Total))
+            {
+                InfoMessage = $"Completed in {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, solved.";
+            }
+            else if (Solutions.Where(x => x.Key != Total).Any())
+            {
+                int i = 1;
+
+                while (i <= 11)
+                {
+                    if (Solutions.ContainsKey(Total + i) && Solutions.ContainsKey(Total - i))
+                    {
+                        InfoMessage = $"Completed in {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, Closest solution is {i} away at {Total - i} & {Total + 1}.";
+                        ActiveTab = Total + i;
+                        break;
+                    }
+                    else if (Solutions.ContainsKey(Total + i))
+                    {
+                        InfoMessage = $"Completed in {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, Closest solution is {i} away at {Total + i}.";
+                        ActiveTab = Total + i;
+                        break;
+                    }
+                    else if (Solutions.ContainsKey(Total - i))
+                    {
+                        InfoMessage = $"Completed in {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, Closest solution is {i} away at {Total - i}.";
+                        ActiveTab = Total - i;
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if (i == 11)
+                {
+                    if (string.IsNullOrWhiteSpace(InfoMessage))
+                    {
+                        InfoMessage = $"Completed in {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, No solution within 10 found";
+                    }
+                }
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(InfoMessage))
+                {
+                    InfoMessage = $"Completed in {new TimeSpan(TickEnd - TickStart).TotalSeconds}s, No solution found";
+                }
+            }
+
+            Running = false;
         }
 
         private static IEnumerable<string> GetOperations()
@@ -299,11 +317,11 @@ namespace BrowserTools.Pages
                             {
                                 char[] item = [' ', ' ', ' ', ' ', ' '];
 
-                                item[0] = i == 0 ? '+' : i == 1 ? '-' : i == 2 ? '*' : i == 3 ? '/' : ' ';
-                                item[1] = j == 0 ? '+' : j == 1 ? '-' : j == 2 ? '*' : j == 3 ? '/' : ' ';
-                                item[2] = k == 0 ? '+' : k == 1 ? '-' : k == 2 ? '*' : k == 3 ? '/' : ' ';
-                                item[3] = l == 0 ? '+' : l == 1 ? '-' : l == 2 ? '*' : l == 3 ? '/' : ' ';
-                                item[4] = m == 0 ? '+' : m == 1 ? '-' : m == 2 ? '*' : m == 3 ? '/' : ' ';
+                                item[0] = i == 0 ? '+' : i == 1 ? '-' : i == 2 ? '×' : i == 3 ? '/' : ' ';
+                                item[1] = j == 0 ? '+' : j == 1 ? '-' : j == 2 ? '×' : j == 3 ? '/' : ' ';
+                                item[2] = k == 0 ? '+' : k == 1 ? '-' : k == 2 ? '×' : k == 3 ? '/' : ' ';
+                                item[3] = l == 0 ? '+' : l == 1 ? '-' : l == 2 ? '×' : l == 3 ? '/' : ' ';
+                                item[4] = m == 0 ? '+' : m == 1 ? '-' : m == 2 ? '×' : m == 3 ? '/' : ' ';
 
                                 string stringCheck1 = string.Join("", item[0..1]);
                                 string stringCheck2 = string.Join("", item[0..2]);
@@ -415,6 +433,15 @@ namespace BrowserTools.Pages
                     ++i;
                 }
             }
+        }
+
+        private MarkupString BuildSVG(int target, string solution)
+        {
+            string SVGStart = "<div class=\"svg-container\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"500\" height=\"40\" viewBox=\"0 0 500 40\"><text x=\"250\" y=\"20\" text-anchor=\"middle\" dominant-baseline=\"middle\" font-family=\"Arial\" font-size=\"24\">";
+            string SVGEnd = "</text></svg></div>";
+            string text = $"{target} = {solution}";
+
+            return new MarkupString($"{SVGStart}{text}{SVGEnd}");
         }
     }
 }
