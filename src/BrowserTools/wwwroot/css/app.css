@@ -12,7 +12,6 @@ body {
 
 header {
     margin: 0 auto;
-    padding: 64px 24px 32px;
     justify-items: center;
 }
 
@@ -47,7 +46,7 @@ select {
 }
 
 .panel {
-    width: 80vw;
+    width: 100%;
     display: inline-flex;
     justify-items: center;
     flex-direction: column;
@@ -68,8 +67,8 @@ td {
 }
 
 .result {
-    height: 70vh;
-    overflow-y: scroll;
+    flex: 1;
+    background: white;
 }
 
     .result svg {
