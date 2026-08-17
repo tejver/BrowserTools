@@ -123,7 +123,7 @@ namespace BrowserTools.Pages
                     {
                         StringBuilder result = new StringBuilder();
 
-                        result.AppendLine($"<svg viewbox=\"0 0 {Sheet.Width} {Sheet.Height}\" height=\"{Sheet.Height}\" width=\"{Sheet.Width}\" preserveAspectRatio=\"xMidYMid meet\">");
+                        result.AppendLine($"<svg viewbox=\"0 0 {Sheet.Width} {Sheet.Height}\" height=\"{Sheet.Height + 1}\" width=\"{Sheet.Width + 1}\" preserveAspectRatio=\"xMidYMid meet\">");
 
                         result.AppendLine($"<rect x=\"0\" y=\"0\" height=\"{Sheet.Height}\" width=\"{Sheet.Width}\" fill=\"#f5f5f5\" stroke=\"red\"/>");
 

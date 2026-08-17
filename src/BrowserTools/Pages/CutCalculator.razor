@@ -3,7 +3,7 @@
 <PageTitle>Cut Calulator</PageTitle>
 
 <body>
-    
+
     <header>
         <h1>Cut Calulator</h1>
     </header>
@@ -20,11 +20,11 @@
             <div class="panel">
                 <div class="tools">
                     <div class="tool">
-                        <h3>Height</h3>
+                        <label>Height</label>
                         <input id="height" type="number" min="300" @bind="Sheet.Height" />
                     </div>
                     <div class="tool">
-                        <h3>Width</h3>
+                        <label>Width</label>
                         <input id="width" type="number" min="300" @bind="Sheet.Width" />
                     </div>
                 </div>
@@ -56,12 +56,12 @@
                                 <input type="number" min="1" @bind="item.Quantity" />
                             </td>
                             <td>
-                                <button @onclick="() => RemoveItem(item)">Remove</button>
+                                <button class="btn btn-danger" @onclick="() => RemoveItem(item)">Remove</button>
                             </td>
                         </tr>
                     }
 
-                    <tr>
+                    <tr class="newrow">
                         <td>
                             <input type="number" min="50" @bind="AddPiece.Height" />
                         </td>
@@ -72,7 +72,7 @@
                             <input type="number" min="1" @bind="AddPiece.Quantity" />
                         </td>
                         <td>
-                            <button @onclick="AddItem">Add</button>
+                            <button class="btn btn-primary" @onclick="AddItem">Add</button>
                         </td>
                     </tr>
 
@@ -107,12 +107,34 @@
                             }
                         </div>
 
+
+                        <div id="myNav" class="overlay">
+                            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+                            <div class="overlay-content">
+                                @(Output[ActiveTab])
+                            </div>
+                        </div>
+
                         <div class="svg-container">
+                            <span style="font-size:48px;cursor:pointer" onclick="openNav()">&#43;</span>
                             @(Output[ActiveTab])
                         </div>
                     </div>
                 </div>
             }
+
+            <script>
+                function openNav() {
+                    document.getElementById("myNav").style.display = "block";
+                }
+
+                function closeNav() {
+                    document.getElementById("myNav").style.display = "none";
+                }
+            </script>
+
         }
+
+
     </main>
 </body>
