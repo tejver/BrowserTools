@@ -165,11 +165,6 @@ namespace BrowserTools.Pages
                     }
                 }
 
-                for (int i = 1; i <= 10; i++)
-                {
-                    result.Add(i, new List<int[]>());
-                }
-
                 int cutSheet = 1;
                 int x = Kerf;
                 int y = Kerf;
@@ -191,6 +186,11 @@ namespace BrowserTools.Pages
 
                     foreach (Panel item in sections)
                     {
+                        if (!result.ContainsKey(cutSheet))
+                        {
+                            result.Add(cutSheet, new List<int[]>());
+                        }
+
                         if ((item.Height + yKerf) <= ySpace && item.Width <= xSpace)
                         {
                             remove.Add(item);

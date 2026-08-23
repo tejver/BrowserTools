@@ -5,8 +5,8 @@ Collection of browser based tools, deployed using - https://learn.microsoft.com/
 [Deployed Instance](https://tejver.github.io/BrowserTools/)
 
 ### Countdown Numbers
-- Brute force, unoptimized Countdown numbers solver.
-    - It checks all combinations of numbers and operations, rather than taking advantage of prime factorisations shortcuts which are effective for large numbers used in a Beltmatic Factory generator.
+- C# translation based off https://github.com/jes/cntdn
+    - Tweaks include returning all the best results within 10 of target
 
 ### Cut Calculator
 - Based off CellBlocks solver, a cut caculator which can split a defined area into the requried sections.
