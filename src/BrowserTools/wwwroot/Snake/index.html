@@ -1,0 +1,444 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Snake</title>
+
+    <link rel="stylesheet" href="../static.css">
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #myContainer {
+            position: relative;
+            background: green;
+            overflow: hidden;
+        }
+
+        .snakePart {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            background: black;
+        }
+
+        #food {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            background: red;
+            display: none;
+        }
+
+        #gameOver {
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+        }
+
+        select {
+            height: 60px;
+            width: 140px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        label {
+            display: inline-block;
+            font-size: 1.75em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="panel">
+        <label>
+            SPACE - Start / Restart, WASD / Arrow Keys - Movement
+        </label>
+        <br />
+        <label for="speedSelect">Speed:</label>
+
+        <select id="speedSelect">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5" selected>5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+        </select>
+
+        <label for="gridSelect">Grid Size:</label>
+
+        <select id="gridSelect">
+            <option value="5x5">5 x 5</option>
+            <option value="25x25">25 x 25</option>
+            <option value="21x13" selected>21 x 13</option>
+            <option value="33x25">33 x 25</option>
+            <option value="45x25">45 x 25</option>
+        </select>
+
+        <br />
+
+        <label id="score">Score: 0</label>
+        <br />
+        <label id="lastScore">Last Score: 0</label>
+        <br />
+        <label id="highScore">High Score: 0</label>
+        <br />
+
+        <div id="myContainer">
+            <div id="food"></div>
+        </div>
+    </div>
+
+    <p id="gameOver">
+        GAME OVER - Press SPACE to restart
+    </p>
+
+    <script>
+        var container = document.getElementById("myContainer");
+        var food = document.getElementById("food");
+        var gameOverText = document.getElementById("gameOver");
+
+        var speedSelect = document.getElementById("speedSelect");
+        var gridSelect = document.getElementById("gridSelect");
+
+        var scoreText = document.getElementById("score");
+        var lastScoreText = document.getElementById("lastScore");
+        var highScoreText = document.getElementById("highScore");
+
+        var blockSize = 20;
+
+        var gridWidth;
+        var gridHeight;
+
+        var containerWidth;
+        var containerHeight;
+
+        var snake = [
+            { x: 200, y: 120 }
+        ];
+
+        var foodX = 0;
+        var foodY = 0;
+
+        var eatenFoodPositions = [];
+
+        var score = 0;
+        var lastScore = 0;
+        var highScore = 0;
+
+        var speed = 1;
+
+        var gameStarted = false;
+        var gameOver = false;
+
+        var directionX = 0;
+        var directionY = 0;
+
+        var nextDirectionX = 0;
+        var nextDirectionY = 0;
+
+        var lastMoveTime = 0;
+
+        var directions = [
+            { x: 1, y: 0 },
+            { x: -1, y: 0 },
+            { x: 0, y: 1 },
+            { x: 0, y: -1 }
+        ];
+
+        function setGridSize() {
+            var grid = gridSelect.value.split("x");
+
+            gridWidth = parseInt(grid[0]);
+            gridHeight = parseInt(grid[1]);
+
+            containerWidth = gridWidth * blockSize;
+            containerHeight = gridHeight * blockSize;
+
+            container.style.width = containerWidth + "px";
+            container.style.height = containerHeight + "px";
+
+            var startX = Math.floor(gridWidth / 2) * blockSize;
+            var startY = Math.floor(gridHeight / 2) * blockSize;
+
+            snake = [
+                { x: startX, y: startY }
+            ];
+
+            drawSnake();
+        }
+
+        function setRandomDirection() {
+            var randomDirection = directions[Math.floor(Math.random() * directions.length)];
+
+            directionX = randomDirection.x;
+            directionY = randomDirection.y;
+
+            nextDirectionX = directionX;
+            nextDirectionY = directionY;
+        }
+
+        function drawSnake() {
+            var oldParts = container.querySelectorAll(".snakePart");
+
+            for (var i = 0; i < oldParts.length; i++) {
+                oldParts[i].remove();
+            }
+
+            for (var i = 0; i < snake.length; i++) {
+                var part = document.createElement("div");
+
+                part.className = "snakePart";
+                part.style.left = snake[i].x + 2 + "px";
+                part.style.top = snake[i].y + 2 + "px";
+
+                container.appendChild(part);
+            }
+        }
+
+        function createFood() {
+            var validPosition = false;
+
+            while (!validPosition) {
+                foodX = Math.floor(Math.random() * gridWidth) * blockSize;
+                foodY = Math.floor(Math.random() * gridHeight) * blockSize;
+
+                validPosition = true;
+
+                for (var i = 0; i < snake.length; i++) {
+                    if (snake[i].x === foodX &&
+                        snake[i].y === foodY) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+            }
+
+            food.style.left = foodX + 2 + "px";
+            food.style.top = foodY + 2 + "px";
+            food.style.display = "block";
+        }
+
+        function updateScore() {
+            scoreText.innerHTML = "Score: " + score;
+
+            if (score > highScore) {
+                highScore = score;
+                highScoreText.innerHTML = "High Score: " + highScore;
+            }
+        }
+
+        function startGame() {
+            setGridSize();
+
+            speed = parseInt(speedSelect.value);
+
+            speedSelect.disabled = true;
+            gridSelect.disabled = true;
+
+            setRandomDirection();
+
+            gameStarted = true;
+            gameOver = false;
+            lastMoveTime = 0;
+
+            createFood();
+        }
+
+        function restartGame() {
+            setGridSize();
+
+            eatenFoodPositions = [];
+
+            score = 0;
+            speed = parseInt(speedSelect.value);
+
+            updateScore();
+
+            speedSelect.disabled = true;
+            gridSelect.disabled = true;
+
+            setRandomDirection();
+
+            gameStarted = true;
+            gameOver = false;
+            lastMoveTime = 0;
+
+            gameOverText.style.display = "none";
+            food.style.display = "none";
+
+            createFood();
+        }
+
+        function setNextDirection(x, y) {
+            if (x === -directionX &&
+                y === -directionY) {
+                return;
+            }
+
+            nextDirectionX = x;
+            nextDirectionY = y;
+        }
+
+        gridSelect.addEventListener("change", function () {
+            if (!gameStarted) {
+                setGridSize();
+            }
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.code === "Space") {
+                event.preventDefault();
+
+                if (gameOver) {
+                    restartGame();
+                }
+                else if (!gameStarted) {
+                    startGame();
+                }
+
+                return;
+            }
+
+            if (!gameStarted || gameOver) {
+                return;
+            }
+
+            switch (event.key) {
+                case "ArrowUp":
+                case "w":
+                case "W":
+                    setNextDirection(0, -1);
+                    break;
+
+                case "ArrowDown":
+                case "s":
+                case "S":
+                    setNextDirection(0, 1);
+                    break;
+
+                case "ArrowLeft":
+                case "a":
+                case "A":
+                    setNextDirection(-1, 0);
+                    break;
+
+                case "ArrowRight":
+                case "d":
+                case "D":
+                    setNextDirection(1, 0);
+                    break;
+            }
+        });
+
+        function moveSnake() {
+            directionX = nextDirectionX;
+            directionY = nextDirectionY;
+
+            var newHead = {
+                x: snake[0].x + directionX * blockSize,
+                y: snake[0].y + directionY * blockSize
+            };
+
+            if (newHead.x < 0 ||
+                newHead.x >= containerWidth ||
+                newHead.y < 0 ||
+                newHead.y >= containerHeight) {
+                endGame();
+                return;
+            }
+
+            for (var i = 0; i < snake.length; i++) {
+                if (newHead.x === snake[i].x &&
+                    newHead.y === snake[i].y) {
+                    endGame();
+                    return;
+                }
+            }
+
+            var foodEaten =
+                newHead.x === foodX &&
+                newHead.y === foodY;
+
+            snake.unshift(newHead);
+
+            if (foodEaten) {
+                eatenFoodPositions.push({
+                    x: foodX,
+                    y: foodY
+                });
+
+                score += speed;
+                updateScore();
+
+                createFood();
+            }
+
+            var tail = snake[snake.length - 1];
+            var grow = false;
+
+            if (eatenFoodPositions.length > 0) {
+                var eatenPosition = eatenFoodPositions[0];
+
+                if (tail.x === eatenPosition.x &&
+                    tail.y === eatenPosition.y) {
+                    grow = true;
+                    eatenFoodPositions.shift();
+                }
+            }
+
+            if (!grow) {
+                snake.pop();
+            }
+
+            drawSnake();
+        }
+
+        function endGame() {
+            gameOver = true;
+            gameStarted = false;
+
+            lastScore = score;
+            lastScoreText.innerHTML = "Last Score: " + lastScore;
+
+            speedSelect.disabled = false;
+            gridSelect.disabled = false;
+
+            food.style.display = "none";
+            gameOverText.style.display = "block";
+        }
+
+        function move(currentTime) {
+            if (!lastMoveTime) {
+                lastMoveTime = currentTime;
+            }
+
+            if (gameStarted && !gameOver) {
+                var moveInterval = 1000 / speed;
+
+                if (currentTime - lastMoveTime >= moveInterval) {
+                    moveSnake();
+                    lastMoveTime = currentTime;
+                }
+            }
+
+            requestAnimationFrame(move);
+        }
+
+        setGridSize();
+        setRandomDirection();
+
+        requestAnimationFrame(move);
+    </script>
+
+</body>
+</html>
