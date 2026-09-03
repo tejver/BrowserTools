@@ -63,7 +63,7 @@
 
                     <tr class="newrow">
                         <td>
-                            <input type="number" min="50" @bind="AddPiece.Height" />
+                            <input type="number" min="50" @bind="AddPiece.Height" @ref="FocusInput" />
                         </td>
                         <td>
                             <input type="number" min="50" @bind="AddPiece.Width" />

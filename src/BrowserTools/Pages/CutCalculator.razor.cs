@@ -10,6 +10,8 @@ namespace BrowserTools.Pages
         private List<Piece> Pieces = [];
 
         private Piece AddPiece = new();
+        private ElementReference FocusInput;
+        private bool AddInput;
 
         private bool Running = false;
 
@@ -35,11 +37,21 @@ namespace BrowserTools.Pages
                 Pieces.Add(AddPiece);
 
                 AddPiece = new();
+                AddInput = true;
                 InfoMessage = "";
             }
             else
             {
                 InfoMessage = "Invalid value, must be greater than 0";
+            }
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (AddInput)
+            {
+                AddInput = false;
+                await FocusInput.FocusAsync();
             }
         }
 
@@ -79,7 +91,7 @@ namespace BrowserTools.Pages
 
             if (Pieces.Select(x => x.Width).Where(x => x + 20 > Sheet.Width).Any())
             {
-                InfoMessage = "Invalid section, value has at least 20 less  than width";
+                InfoMessage = "Invalid section, value has at least 20 less than width";
                 Running = false;
                 return;
             }
@@ -157,7 +169,7 @@ namespace BrowserTools.Pages
 
                 List<Panel> sections = new();
 
-                foreach (Piece item in pieces.OrderByDescending(x => x.Quantity).ThenByDescending(x => x.Height).ThenByDescending(x => x.Width))
+                foreach (Piece item in pieces.OrderByDescending(x => x.Height * x.Width))
                 {
                     for (int i = 0; i < item.Quantity; i++)
                     {
@@ -182,60 +194,92 @@ namespace BrowserTools.Pages
                 {
                     await Task.Yield();
 
-                    List<Panel> remove = new();
-
-                    foreach (Panel item in sections)
+                    while (true)
                     {
-                        if (!result.ContainsKey(cutSheet))
+                        List<Panel> remove = new();
+                        bool reset = false;
+
+                        for (int i = 0; i < sections.Count; i++)
                         {
-                            result.Add(cutSheet, new List<int[]>());
-                        }
+                            Panel item = sections[i];
 
-                        if ((item.Height + yKerf) <= ySpace && item.Width <= xSpace)
-                        {
-                            remove.Add(item);
-                            result[cutSheet].Add([xCoord, yCoord, item.Height, item.Width]);
-
-                            if (item.Height + Spacer < ySpace)
+                            if (!result.ContainsKey(cutSheet))
                             {
-                                yCoord += item.Height;
-
-                                xSpace = item.Width;
-                                ySpace -= (item.Height + Kerf);
-
-                                yKerf += Kerf;
-                            }
-                            else
-                            {
-                                xCoord = Kerf;
-                                yCoord = Kerf;
-
-                                xSpace = 0;
-                                ySpace = 0;
-
-                                yKerf = 0;
-                            }
-                        }
-                        else if ((x + (item.Width + xKerf)) < sheet.Width)
-                        {
-                            remove.Add(item);
-
-                            result[cutSheet].Add([x, y, item.Height, item.Width]);
-
-                            if (item.Height + Spacer < sheet.Height)
-                            {
-                                xCoord = x;
-                                yCoord = item.Height + Kerf;
-
-                                xSpace = item.Width;
-                                ySpace = sheet.Height - Kerf - item.Height;
-
-                                yKerf = 0;
+                                result.Add(cutSheet, new List<int[]>());
                             }
 
-                            x += item.Width;
-                            xKerf += Kerf;
+                            if (sections.Except(remove).Where(x => (x.Height + yKerf) <= ySpace && x.Width <= xSpace).Any())
+                            {
+                                if (!((item.Height + yKerf) <= ySpace && item.Width <= xSpace))
+                                {
+                                    continue;
+                                }
+
+                                reset = true;
+                            }
+
+                            if ((item.Height + yKerf) <= ySpace && item.Width <= xSpace)
+                            {
+                                remove.Add(item);
+                                result[cutSheet].Add([xCoord, yCoord, item.Height, item.Width]);
+
+                                if (item.Height + Spacer < ySpace)
+                                {
+                                    yCoord += item.Height;
+
+                                    xSpace = item.Width;
+                                    ySpace -= (item.Height + Kerf);
+
+                                    yKerf += Kerf;
+                                }
+                                else
+                                {
+                                    xCoord = Kerf;
+                                    yCoord = Kerf;
+
+                                    xSpace = 0;
+                                    ySpace = 0;
+
+                                    yKerf = 0;
+                                }
+                            }
+                            else if ((x + (item.Width + xKerf)) < sheet.Width)
+                            {
+                                remove.Add(item);
+
+                                result[cutSheet].Add([x, y, item.Height, item.Width]);
+
+                                if (item.Height + Spacer < sheet.Height)
+                                {
+                                    xCoord = x;
+                                    yCoord = item.Height + Kerf;
+
+                                    xSpace = item.Width;
+                                    ySpace = sheet.Height - Kerf - item.Height;
+
+                                    yKerf = 0;
+                                }
+
+                                x += item.Width;
+                                xKerf += Kerf;
+                            }
+
+                            if (reset)
+                            {
+                                break;
+                            }
                         }
+
+                        foreach (Panel item in remove)
+                        {
+                            sections.Remove(item);
+                        }
+
+                        int xSheet = sheet.Width - x;
+                        int ySheet = sheet.Height - y;
+
+                        if (!sections.Where(x => x.Height <= ySheet && x.Width <= xSheet).Any())
+                            break;
                     }
 
                     x = Kerf;
@@ -252,16 +296,10 @@ namespace BrowserTools.Pages
 
                     cutSheet++;
 
-                    foreach (Panel item in remove)
-                    {
-                        sections.Remove(item);
-                    }
-
                     if (!sections.Any())
                     {
                         break;
                     }
-
                 }
 
                 return result;
