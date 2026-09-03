@@ -12,6 +12,12 @@ Collection of browser based tools, deployed using - https://learn.microsoft.com/
 - Based off CellBlocks solver, a cut caculator which can split a defined area into the requried sections.
     - Has a kerf margin built in, to allow it to be used for planning sheet material cuts.
 
+### Snake
+- Based off Snake (1998) Nokia Edition.
+
+### Date Tangram
+- Tangram puzzle, solve for date
+
 <!-- ### Image Edit Rotator
 - Canvas drawing pad which rotates and mirrors the live drawing, used to understand symmetry and create ambigrams. -->
 
