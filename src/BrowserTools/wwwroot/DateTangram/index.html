@@ -1,0 +1,644 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Snake</title>
+
+    <link rel="stylesheet" href="../static.css">
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        tr {
+            height: 80px;
+        }
+
+        td {
+            width: 80px;
+            border: 1px solid black;
+            font-size: 24px;
+        }
+
+        #table1 {
+            border-collapse: collapse;
+        }
+
+        #mydiv0, #mydiv1, #mydiv2, #mydiv3, #mydiv4, #mydiv5, #mydiv6, #mydiv7 {
+            position: absolute;
+        }
+
+            #mydiv0 table, #mydiv1 table, #mydiv2 table, #mydiv3 table,
+            #mydiv4 table, #mydiv5 table, #mydiv6 table, #mydiv7 table {
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+
+            #mydiv0 td, #mydiv1 td, #mydiv2 td, #mydiv3 td,
+            #mydiv4 td, #mydiv5 td, #mydiv6 td, #mydiv7 td {
+                box-sizing: border-box;
+            }
+
+            #mydiv0 td {
+                z-index: 10;
+                background-color: lightpink;
+            }
+
+            #mydiv1 td {
+                z-index: 11;
+                background-color: lightsalmon;
+            }
+
+            #mydiv2 td {
+                z-index: 12;
+                background-color: khaki;
+            }
+
+            #mydiv3 td {
+                z-index: 13;
+                background-color: palegreen;
+            }
+
+            #mydiv4 td {
+                z-index: 14;
+                background-color: paleturquoise;
+            }
+
+            #mydiv5 td {
+                z-index: 15;
+                background-color: lightblue;
+            }
+
+            #mydiv6 td {
+                z-index: 16;
+                background-color: plum;
+            }
+
+            #mydiv7 td {
+                z-index: 17;
+                background-color: moccasin;
+            }
+
+        #mydivheader {
+            cursor: move;
+            z-index: 10;
+            color: #fff;
+        }
+
+        .snapped td {
+            filter: brightness(0.8);
+        }
+
+        #solved {
+            display: none;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        label {
+            display: inline-block;
+            font-size: 1.75em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="panel">
+        <label id="instructions">
+            Click and Drag, Double Click to rotate, Right Click to flip
+        </label>
+        <br />
+        <table id="table1">
+            <tr>
+                <td id="m0">Jan</td>
+                <td id="m1">Feb</td>
+                <td id="m2">Mar</td>
+                <td id="m3">Apr</td>
+                <td id="m4">May</td>
+                <td id="m5">Jun</td>
+                <td style="border:none"></td>
+            </tr>
+            <tr>
+                <td id="m6">Jul</td>
+                <td id="m7">Aug</td>
+                <td id="m8" ">Sep</td>
+                <td id="m9">Oct</td>
+                <td id="m10">Nov</td>
+                <td id="m11">Dec</td>
+                <td style="border:none"></td>
+            </tr>
+            <tr>
+                <td id="d1">1</td>
+                <td id="d2">2</td>
+                <td id="d3">3</td>
+                <td id="d4">4</td>
+                <td id="d5">5</td>
+                <td id="d6">6</td>
+                <td id="d7">7</td>
+            </tr>
+            <tr>
+                <td id="d8">8</td>
+                <td id="d9">9</td>
+                <td id="d10">10</td>
+                <td id="d11">11</td>
+                <td id="d12">12</td>
+                <td id="d13">13</td>
+                <td id="d14">14</td>
+
+            </tr>
+            <tr>
+                <td id="d15">15</td>
+                <td id="d16">16</td>
+                <td id="d17">17</td>
+                <td id="d18">18</td>
+                <td id="d19">19</td>
+                <td id="d20">20</td>
+                <td id="d21">21</td>
+            </tr>
+            <tr>
+                <td id="d22">22</td>
+                <td id="d23">23</td>
+                <td id="d24">24</td>
+                <td id="d25">25</td>
+                <td id="d26">26</td>
+                <td id="d27">27</td>
+                <td id="d28">28</td>
+            </tr>
+            <tr>
+                <td id="d29">29</td>
+                <td id="d30">30</td>
+                <td id="d31">31</td>
+                <td style="border:none"></td>
+                <td style="border:none"></td>
+                <td style="border:none"></td>
+                <td style="border:none"></td>
+            </tr>
+        </table>
+
+        <div id="mydiv0"></div>
+        <div id="mydiv4"></div>
+        <div id="mydiv1"></div>
+        <div id="mydiv5"></div>
+        <div id="mydiv2"></div>
+        <div id="mydiv6"></div>
+        <div id="mydiv3"></div>
+        <div id="mydiv7"></div>
+
+        <p id="solved">
+            Solved - come back tomorrow for the next puzzle
+        </p>
+    </div>
+
+    <script>
+        let datePieces = [
+            [[1, 1, 1], [1, 1, 1]],
+            [[1, 1, 1], [1, 0, 1]],
+            [[1, 1, 1], [0, 1, 1]],
+            [[1, 1, 1, 1], [1, 0, 0, 0]],
+            [[1, 1, 1, 1], [0, 1, 0, 0]],
+            [[1, 1, 1, 0], [0, 0, 1, 1]],
+            [[1, 0, 0], [1, 0, 0], [1, 1, 1]],
+            [[1, 1, 0], [0, 1, 0], [0, 1, 1]]
+        ];
+
+        let piecePositions = [
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0]
+        ];
+
+        if ("ontouchstart" in window) {
+            document.getElementById("instructions").textContent =
+                "Touch and Drag, Double Tap to rotate, Long Press to flip";
+        }
+
+        var solvedText = document.getElementById("solved");
+        var solved = false;
+
+        function setDate() {
+            const d = new Date();
+
+            var date = document.getElementById("d" + d.getDate());
+            var month = document.getElementById("m" + d.getMonth());
+
+            date.style.backgroundColor = "lightgrey";
+            month.style.backgroundColor = "lightgrey";
+
+            if (d.getMonth() > 5) {
+                piecePositions[1][d.getMonth() - 6] = "X";
+            } else {
+                piecePositions[0][d.getMonth()] = "X";
+            }
+
+            if (d.getDate() > 28) {
+                piecePositions[6][d.getDate() - 29] = "X";
+            } else if (d.getDate() > 21) {
+                piecePositions[5][d.getDate() - 22] = "X";
+            } else if (d.getDate() > 14) {
+                piecePositions[4][d.getDate() - 15] = "X";
+            } else if (d.getDate() > 7) {
+                piecePositions[3][d.getDate() - 8] = "X";
+            } else {
+                piecePositions[2][d.getDate() - 1] = "X";
+            }
+        }
+
+        setDate();
+
+        const div0 = document.getElementById("mydiv0");
+        const div1 = document.getElementById("mydiv1");
+        const div2 = document.getElementById("mydiv2");
+        const div3 = document.getElementById("mydiv3");
+        const div4 = document.getElementById("mydiv4");
+        const div5 = document.getElementById("mydiv5");
+        const div6 = document.getElementById("mydiv6");
+        const div7 = document.getElementById("mydiv7");
+
+        div0.innerHTML = drawElement(datePieces[0]);
+        div1.innerHTML = drawElement(datePieces[1]);
+        div2.innerHTML = drawElement(datePieces[2]);
+        div3.innerHTML = drawElement(datePieces[3]);
+        div4.innerHTML = drawElement(datePieces[4]);
+        div5.innerHTML = drawElement(datePieces[5]);
+        div6.innerHTML = drawElement(datePieces[6]);
+        div7.innerHTML = drawElement(datePieces[7]);
+
+        randomPosition(div0);
+        randomPosition(div1);
+        randomPosition(div2);
+        randomPosition(div3);
+        randomPosition(div4);
+        randomPosition(div5);
+        randomPosition(div6);
+        randomPosition(div7);
+
+        dragElement(div0);
+        dragElement(div1);
+        dragElement(div2);
+        dragElement(div3);
+        dragElement(div4);
+        dragElement(div5);
+        dragElement(div6);
+        dragElement(div7);
+
+        div0.addEventListener("contextmenu", e => { e.preventDefault() });
+        div1.addEventListener("contextmenu", e => { e.preventDefault() });
+        div2.addEventListener("contextmenu", e => { e.preventDefault() });
+        div3.addEventListener("contextmenu", e => { e.preventDefault() });
+        div4.addEventListener("contextmenu", e => { e.preventDefault() });
+        div5.addEventListener("contextmenu", e => { e.preventDefault() });
+        div6.addEventListener("contextmenu", e => { e.preventDefault() });
+        div7.addEventListener("contextmenu", e => { e.preventDefault() });
+
+        function drawElement(data) {
+            let html = "<table>";
+
+            data.forEach(row => {
+                html += "<tr>";
+
+                row.forEach(value => {
+                    if (value === 0) {
+                        html += '<td style="border:none;background-color:transparent;"></td>';
+                    } else {
+                        html += '<td id="mydivheader"></td>';
+                    }
+                });
+
+                html += "</tr>";
+            });
+
+            html += "</table>";
+
+            return html;
+        }
+
+        function randomPosition(elmnt) {
+            const panel = document.querySelector(".panel");
+            const grid = document.getElementById("table1");
+
+            const panelRect = panel.getBoundingClientRect();
+            const gridRect = grid.getBoundingClientRect();
+
+            let left, top;
+
+            do {
+                left = Math.random() * (panel.clientWidth - elmnt.offsetWidth);
+                top = Math.random() * (panel.clientHeight - elmnt.offsetHeight);
+            } while (
+                left + elmnt.offsetWidth > gridRect.left - panelRect.left &&
+                left < gridRect.right - panelRect.left &&
+                top + elmnt.offsetHeight > gridRect.top - panelRect.top &&
+                top < gridRect.bottom - panelRect.top
+            );
+
+            elmnt.style.left = left + "px";
+            elmnt.style.top = top + "px";
+        }
+
+        function dragElement(elmnt) {
+            var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            var lastTap = 0;
+            var longPressTimer = null;
+            var isDragging = false;
+
+            elmnt.onmousedown = dragMouseDown;
+            elmnt.ondblclick = rotate;
+            elmnt.oncontextmenu = mirror;
+
+            elmnt.addEventListener("touchstart", touchStart, { passive: false });
+            elmnt.addEventListener("touchmove", touchMove, { passive: false });
+            elmnt.addEventListener("touchend", touchEnd, { passive: false });
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+
+                if (e.target.id !== "mydivheader") {
+                    return;
+                }
+
+                e.preventDefault();
+
+                elmnt.classList.remove("snapped");
+
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+
+                isDragging = true;
+
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+
+                let newTop = elmnt.offsetTop - pos2;
+                let newLeft = elmnt.offsetLeft - pos1;
+
+                const panel = document.querySelector(".panel");
+
+                newLeft = Math.max(0, Math.min(newLeft, panel.clientWidth - elmnt.offsetWidth));
+                newTop = Math.max(0, Math.min(newTop, panel.clientHeight - elmnt.offsetHeight));
+
+                elmnt.style.top = newTop + "px";
+                elmnt.style.left = newLeft + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+
+                snapToGrid();
+            }
+
+            function touchStart(e) {
+                if (e.target.id !== "mydivheader") {
+                    return;
+                }
+
+                e.preventDefault();
+
+                const touch = e.touches[0];
+                const now = Date.now();
+
+                isDragging = false;
+
+                if (now - lastTap < 300) {
+                    clearTimeout(longPressTimer);
+                    lastTap = 0;
+
+                    rotate({
+                        preventDefault: () => { },
+                        currentTarget: elmnt
+                    });
+
+                    return;
+                }
+
+                lastTap = now;
+
+                longPressTimer = setTimeout(() => {
+                    if (!isDragging) {
+                        mirror({
+                            preventDefault: () => { },
+                            currentTarget: elmnt
+                        });
+                    }
+                }, 600);
+
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+            }
+
+            function touchMove(e) {
+                if (!e.touches.length) {
+                    return;
+                }
+
+                e.preventDefault();
+
+                clearTimeout(longPressTimer);
+
+                const touch = e.touches[0];
+
+                isDragging = true;
+
+                pos1 = pos3 - touch.clientX;
+                pos2 = pos4 - touch.clientY;
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+
+                let newTop = elmnt.offsetTop - pos2;
+                let newLeft = elmnt.offsetLeft - pos1;
+
+                const panel = document.querySelector(".panel");
+
+                newLeft = Math.max(0, Math.min(newLeft, panel.clientWidth - elmnt.offsetWidth));
+                newTop = Math.max(0, Math.min(newTop, panel.clientHeight - elmnt.offsetHeight));
+
+                elmnt.style.top = newTop + "px";
+                elmnt.style.left = newLeft + "px";
+            }
+
+            function touchEnd(e) {
+                e.preventDefault();
+
+                clearTimeout(longPressTimer);
+
+                if (isDragging) {
+                    snapToGrid();
+                }
+            }
+
+            function snapToGrid() {
+                const cells = document.querySelectorAll("#table1 td[id]");
+                const pieceRect = elmnt.getBoundingClientRect();
+
+                const x = pieceRect.left;
+                const y = pieceRect.top;
+
+                let targetCell = null;
+
+                cells.forEach(cell => {
+                    const rect = cell.getBoundingClientRect();
+
+                    if (
+                        x >= rect.left &&
+                        x <= rect.right &&
+                        y >= rect.top &&
+                        y <= rect.bottom
+                    ) {
+                        targetCell = cell;
+                    }
+                });
+
+                const pieceId = elmnt.id;
+                const pieceNumber = Number(pieceId.slice(5));
+
+                piecePositions.forEach(row => {
+                    row.forEach((value, index) => {
+                        if (value === pieceId) {
+                            row[index] = 0;
+                        }
+                    });
+                });
+
+                if (!targetCell) {
+                    return;
+                }
+
+                const cellId = targetCell.id;
+                const cellLetter = cellId[0];
+                const cellNumber = Number(cellId.slice(1));
+
+                const row = datePieces[pieceNumber].length;
+                const col = datePieces[pieceNumber][0].length;
+
+                const startrow =
+                    cellLetter == "m" && cellNumber < 6 ? 0 :
+                        cellLetter == "m" ? 1 :
+                            cellLetter == "d" && cellNumber < 8 ? 2 :
+                                cellLetter == "d" && cellNumber < 15 ? 3 :
+                                    cellLetter == "d" && cellNumber < 22 ? 4 :
+                                        cellLetter == "d" && cellNumber < 29 ? 5 : 6;
+
+                const startcol =
+                    cellLetter == "m" ?
+                        cellNumber % 6 :
+                        (cellNumber - 1) % 7;
+
+                for (var i = startrow, i2 = 0; i < startrow + row; i++, i2++) {
+                    for (var j = startcol, j2 = 0; j < startcol + col; j++, j2++) {
+                        if (datePieces[pieceNumber][i2][j2] == 0) {
+                            continue;
+                        } else if (piecePositions[i] === undefined || piecePositions[i][j] === undefined) {
+                            return;
+                        } else if (!(piecePositions[i][j] == 0 && datePieces[pieceNumber][i2][j2] == 1)) {
+                            return;
+                        }
+                    }
+                }
+
+                for (var i = startrow, i2 = 0; i < startrow + row; i++, i2++) {
+                    for (var j = startcol, j2 = 0; j < startcol + col; j++, j2++) {
+                        if (piecePositions[i][j] != "X" && datePieces[pieceNumber][i2][j2] == 1) {
+                            piecePositions[i][j] = pieceId;
+                        }
+                    }
+                }
+
+                const panel = document.querySelector(".panel");
+                const panelRect = panel.getBoundingClientRect();
+                const cellRect = targetCell.getBoundingClientRect();
+
+                elmnt.style.left = (cellRect.left - panelRect.left) + "px";
+                elmnt.style.top = (cellRect.top - panelRect.top) + "px";
+                elmnt.classList.add("snapped");
+
+                solved = true;
+
+                piecePositions.forEach(row => {
+                    row.forEach((value, index) => {
+                        if (value === 0) {
+                            solved = false;
+                        }
+                    });
+                });
+
+                if (solved) {
+                    solvedText.style.display = "block";
+                } else {
+                    solvedText.style.display = "none";
+                }
+            }
+
+            function rotate(e) {
+                e = e || window.event;
+                e.preventDefault();
+
+                var id = e.currentTarget.id;
+                var div = document.getElementById(id);
+                var number = id.replace("mydiv", "");
+
+                datePieces[number] = rotateClockwise(datePieces[number]);
+
+                div.innerHTML = drawElement(datePieces[number]);
+                elmnt.classList.remove("snapped");
+                snapToGrid();
+            }
+
+            function mirror(e) {
+                e = e || window.event;
+                e.preventDefault();
+
+                var id = e.currentTarget.id;
+                var div = document.getElementById(id);
+                var number = id.replace("mydiv", "");
+
+                datePieces[number] = mirrorLeftRight(datePieces[number]);
+
+                div.innerHTML = drawElement(datePieces[number]);
+                elmnt.classList.remove("snapped");
+                snapToGrid();
+            }
+        }
+
+        function rotateClockwise(matrix) {
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+
+            const result = [];
+
+            for (let col = 0; col < cols; col++) {
+                const row = [];
+
+                for (let r = rows - 1; r >= 0; r--) {
+                    row.push(matrix[r][col]);
+                }
+
+                result.push(row);
+            }
+
+            return result;
+        }
+
+        function mirrorLeftRight(matrix) {
+            return matrix.map(row => [...row].reverse());
+        }
+    </script>
+
+</body>
+</html>
