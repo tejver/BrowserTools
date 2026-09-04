@@ -26,31 +26,35 @@
                 <span class="bi bi-columns-nav-menu" aria-hidden="true"></span><span class="nav-text"> Cut Calculator</span>
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Snake">
-                <span class="bi bi-snake-nav-menu" aria-hidden="true"></span><span class="nav-text"> Snake</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="DateTangram">
-                <span class="bi bi-blocks-nav-menu" aria-hidden="true"></span><span class="nav-text"> Date Tangram</span>
-            </NavLink>
-        </div>
-@*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ImageEditRotator">
-                <span class="bi bi-brush-nav-menu" aria-hidden="true"></span><span class="nav-text"> Image Edit Rotator</span>
-            </NavLink>
-        </div> *@
-@*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="MdViewer">
-                <span class="bi bi-card-text-nav-menu" aria-hidden="true"></span><span class="nav-text"> Markdown Viewer</span>
-            </NavLink>
-        </div> *@
-@*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="TextDiffChecker">
-                <span class="bi bi-files-nav-menu" aria-hidden="true"></span><span class="nav-text"> Text Compare</span>
-            </NavLink>
-        </div> *@
+
+        @if (!isMobile)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Snake">
+                    <span class="bi bi-snake-nav-menu" aria-hidden="true"></span><span class="nav-text"> Snake</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="DateTangram">
+                    <span class="bi bi-blocks-nav-menu" aria-hidden="true"></span><span class="nav-text"> Date Tangram</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="ImageEditRotator">
+                    <span class="bi bi-brush-nav-menu" aria-hidden="true"></span><span class="nav-text"> Image Edit Rotator</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="MdViewer">
+                    <span class="bi bi-card-text-nav-menu" aria-hidden="true"></span><span class="nav-text"> Markdown Viewer</span>
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="TextDiffChecker">
+                    <span class="bi bi-files-nav-menu" aria-hidden="true"></span><span class="nav-text"> Text Compare</span>
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
@@ -59,6 +63,13 @@
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private bool isMobile = false;
+
+    protected override void OnInitialized()
+    {
+        isMobile = System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS();
+    }
 
     private void ToggleNavMenu()
     {

@@ -9,7 +9,7 @@ Collection of browser based tools, deployed using - https://learn.microsoft.com/
     - Tweaks include returning all the best results within 10 of target
 
 ### Cut Calculator
-- Based off CellBlocks solver, a cut caculator which can split a defined area into the requried sections.
+- Based off CellBlocks solver, a cut calculator which can split a defined area into the required sections.
     - Has a kerf margin built in, to allow it to be used for planning sheet material cuts.
 
 ### Snake
@@ -18,11 +18,11 @@ Collection of browser based tools, deployed using - https://learn.microsoft.com/
 ### Date Tangram
 - Tangram puzzle, solve for date
 
-<!-- ### Image Edit Rotator
-- Canvas drawing pad which rotates and mirrors the live drawing, used to understand symmetry and create ambigrams. -->
+### Image Edit Rotator
+- Canvas drawing pad which rotates and mirrors the live drawing, used to understand symmetry and create ambigrams.
 
-<!-- ### Markdown Viewer
-- Text pad which instant renders Markdown. -->
+### Markdown Viewer
+- Text pad which instant renders Markdown.
 
-<!-- ### Text Difference Checker
-- Shows live differences between 2 texts. -->
+### Text Difference Checker
+- Shows live differences between 2 texts.

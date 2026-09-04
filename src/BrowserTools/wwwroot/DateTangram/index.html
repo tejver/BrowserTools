@@ -107,9 +107,9 @@
 
 <body>
     <div class="panel">
-        <label id="instructions">
+        <h2 id="instructions">
             Click and Drag, Double Click to rotate, Right Click to flip
-        </label>
+        </h2>
         <br />
         <table id="table1">
             <tr>
@@ -213,11 +213,6 @@
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0]
         ];
-
-        if ("ontouchstart" in window) {
-            document.getElementById("instructions").textContent =
-                "Touch and Drag, Double Tap to rotate, Long Press to flip";
-        }
 
         var solvedText = document.getElementById("solved");
         var solved = false;
@@ -352,10 +347,6 @@
             elmnt.ondblclick = rotate;
             elmnt.oncontextmenu = mirror;
 
-            elmnt.addEventListener("touchstart", touchStart, { passive: false });
-            elmnt.addEventListener("touchmove", touchMove, { passive: false });
-            elmnt.addEventListener("touchend", touchEnd, { passive: false });
-
             function dragMouseDown(e) {
                 e = e || window.event;
 
@@ -402,85 +393,6 @@
                 document.onmousemove = null;
 
                 snapToGrid();
-            }
-
-            function touchStart(e) {
-                if (e.target.id !== "mydivheader") {
-                    return;
-                }
-
-                e.preventDefault();
-
-                const touch = e.touches[0];
-                const now = Date.now();
-
-                isDragging = false;
-
-                if (now - lastTap < 300) {
-                    clearTimeout(longPressTimer);
-                    lastTap = 0;
-
-                    rotate({
-                        preventDefault: () => { },
-                        currentTarget: elmnt
-                    });
-
-                    return;
-                }
-
-                lastTap = now;
-
-                longPressTimer = setTimeout(() => {
-                    if (!isDragging) {
-                        mirror({
-                            preventDefault: () => { },
-                            currentTarget: elmnt
-                        });
-                    }
-                }, 600);
-
-                pos3 = touch.clientX;
-                pos4 = touch.clientY;
-            }
-
-            function touchMove(e) {
-                if (!e.touches.length) {
-                    return;
-                }
-
-                e.preventDefault();
-
-                clearTimeout(longPressTimer);
-
-                const touch = e.touches[0];
-
-                isDragging = true;
-
-                pos1 = pos3 - touch.clientX;
-                pos2 = pos4 - touch.clientY;
-                pos3 = touch.clientX;
-                pos4 = touch.clientY;
-
-                let newTop = elmnt.offsetTop - pos2;
-                let newLeft = elmnt.offsetLeft - pos1;
-
-                const panel = document.querySelector(".panel");
-
-                newLeft = Math.max(0, Math.min(newLeft, panel.clientWidth - elmnt.offsetWidth));
-                newTop = Math.max(0, Math.min(newTop, panel.clientHeight - elmnt.offsetHeight));
-
-                elmnt.style.top = newTop + "px";
-                elmnt.style.left = newLeft + "px";
-            }
-
-            function touchEnd(e) {
-                e.preventDefault();
-
-                clearTimeout(longPressTimer);
-
-                if (isDragging) {
-                    snapToGrid();
-                }
             }
 
             function snapToGrid() {

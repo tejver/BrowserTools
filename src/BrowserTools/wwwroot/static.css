@@ -22,6 +22,12 @@ h1 {
     letter-spacing: -1.5px;
 }
 
+h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    letter-spacing: -1.5px;
+}
+
 header p {
     margin: 0;
     color: #666;
@@ -50,6 +56,16 @@ textarea {
     font: 15px/1.5 Consolas,Monaco,monospace;
 }
 
+article {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 20px;
+    font: 15px/1.5 Consolas,Monaco,monospace;
+}
+
 .tools {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -58,7 +74,7 @@ textarea {
 
 .tool {
     display: block;
-    padding: 24px;
+    padding: 16px;
     background: white;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
@@ -87,7 +103,7 @@ textarea {
 
 .canvas-block {
     display: inline-block;
-    padding: 12px;
+    padding: 8px;
     background: white;
     border: 1px solid #e5e5e5;
     border-radius: 12px;
