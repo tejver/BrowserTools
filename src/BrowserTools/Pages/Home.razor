@@ -4,54 +4,65 @@
 
 <h1>Browser tools</h1>
 
-<h2><a href="./countdownNumbers">Countdown Numbers</a></h2>
+<h2>Razor Pages</h2>
+
+<h3><a href="./countdownNumbers">Countdown Numbers</a></h3>
 <p>C# translation based off  <a href="https://github.com/jes/cntdn">https://github.com/jes/cntdn</a></p>
 <p>Tweaks include returning all the best results within 10 of target</p>
 
-<h2><a href="./cutCalculator">Cut Calculator</a></h2>
+<h3><a href="./cutCalculator">Cut Calculator</a></h3>
 <p>Based off CellBlocks solver, a cut caculator which can split a defined area into the requried sections.</p>
 <p>Has a kerf margin built in, to allow it to be used for planning sheet material cuts.</p>
 
-@if (isMobile)
-{
-    <h2>Snake (Not mobile compatible)</h2>
+<div id="mobile" style="display:none">
+    <h2>Static Pages - Not mobile compatible</h2>
+
+    <h3>Snake</h3>
     <p>Based off Snake (1998) Nokia Edition.</p>
 
-    <h2>Date Tangram (Not mobile compatible)</h2>
+    <h3>Date Tangram</h3>
     <p>Tangram puzzle, solve for date.</p>
 
-    <h2>Image Edit Rotator (Not mobile compatible)</h2>
+    <h3>Image Edit Rotator</h3>
     <p>Canvas drawing pad which rotates and mirrors the live drawing, used to understand symmetry and create ambigrams.</p>
 
-    <h2>Markdown Viewer (Not mobile compatible)</h2>
+    <h3>Markdown Viewer</h3>
     <p>Text pad which instant renders Markdown.</p>
 
-    <h2>Text Compare (Not mobile compatible)</h2>
+    <h3>Text Compare</h3>
     <p>Shows live differences between 2 texts.</p>
-}
-else
-{
-    <h2><a href="./Snake">Snake</a></h2>
+</div>
+
+<div id="desktop" style="display:none">
+    <h2>Static Pages</h2>
+
+    <h3><a href="./Snake">Snake</a></h3>
     <p>Based off Snake (1998) Nokia Edition.</p>
 
-    <h2><a href="./DateTangram">Date Tangram</a></h2>
+    <h3><a href="./DateTangram">Date Tangram</a></h3>
     <p>Tangram puzzle, solve for date.</p>
 
-    <h2><a href="./ImageEditRotator">Image Edit Rotator</a></h2>
+    <h3><a href="./ImageEditRotator">Image Edit Rotator</a></h3>
     <p>Canvas drawing pad which rotates and mirrors the live drawing, used to understand symmetry and create ambigrams.</p>
 
-    <h2><a href="./MdViewer">Markdown Viewer</a></h2>
+    <h3><a href="./MdViewer">Markdown Viewer</a></h3>
     <p>Text pad which instant renders Markdown.</p>
 
-    <h2><a href="./TextDiffChecker">Text Compare</a></h2>
+    <h3><a href="./TextDiffChecker">Text Compare</a></h3>
     <p>Shows live differences between 2 texts.</p>
-}
+</div>
 
-@code {
-    private bool isMobile = false;
+<script>
+    const isMobile =
+        /Android/i.test(navigator.userAgent) ||
+        /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" &&
+            navigator.maxTouchPoints > 1);
 
-    protected override void OnInitialized()
-    {
-        isMobile = System.OperatingSystem.IsAndroid() || System.OperatingSystem.IsIOS();
+    if (isMobile) {
+        document.getElementById("mobile").style.display = "block";
+    } else {
+        document.getElementById("desktop").style.display = "block";
+        document.getElementById("desktopMenu").style.display = "block";
     }
-}
+</script>

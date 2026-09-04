@@ -4,6 +4,7 @@ Collection of browser based tools, deployed using - https://learn.microsoft.com/
 
 [Deployed Instance](https://tejver.github.io/BrowserTools/)
 
+## Razor Pages
 ### Countdown Numbers
 - C# translation based off https://github.com/jes/cntdn
     - Tweaks include returning all the best results within 10 of target
@@ -12,6 +13,7 @@ Collection of browser based tools, deployed using - https://learn.microsoft.com/
 - Based off CellBlocks solver, a cut calculator which can split a defined area into the required sections.
     - Has a kerf margin built in, to allow it to be used for planning sheet material cuts.
 
+## Static Pages
 ### Snake
 - Based off Snake (1998) Nokia Edition.
 
